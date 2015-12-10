@@ -1,0 +1,6 @@
+c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\bin\Debug\PuzzleSolver.exe.config
+c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\obj\Debug\PuzzleSolver.csprojResolveAssemblyReference.cache
+c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\bin\Debug\PuzzleSolver.exe
+c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\bin\Debug\PuzzleSolver.pdb
+c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\obj\Debug\PuzzleSolver.exe
+c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\obj\Debug\PuzzleSolver.pdb
