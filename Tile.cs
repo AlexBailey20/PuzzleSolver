@@ -35,7 +35,6 @@ namespace PuzzleSolver
             char c = ' ';
             solution = false;
             this.Compress();
-            FindOrientations(dimensions, rsize, csize);
             for(int i=0; i < csize; i++)
             {
                 for(int j = 0; j < rsize; j++)
@@ -143,6 +142,17 @@ namespace PuzzleSolver
             Rotate90(initial_orientation);
             Rotate180(initial_orientation);
             Rotate270(initial_orientation);
+            Console.WriteLine(size);
+            Console.WriteLine(orientations.Count);
+            Console.ReadKey();
+        }
+        public bool CheckDimensions(char[,] dims)
+        {
+            if(dims.GetLength(0) > sol_c || dims.GetLength(1) > sol_r)
+            {
+                return false;
+            }
+            return true;
         }
 //Method which reflects a 2D char array, checks if its a unique orientation, and potentially adds it to the list of orientations
         public void Reflect(char[,] initial_orientation)
@@ -164,7 +174,7 @@ namespace PuzzleSolver
                     break;
                 }
             }
-            if (uni)
+            if (uni && CheckDimensions(reflected))
             {
                 Orientation m = new Orientation(reflected, reflected.GetLength(0), reflected.GetLength(1));
                 orientations.Add(m);
@@ -192,7 +202,7 @@ namespace PuzzleSolver
                     break;
                 }
             }
-            if (uni)
+            if (uni && CheckDimensions(rotated))
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 orientations.Add(m);
@@ -224,7 +234,7 @@ namespace PuzzleSolver
                     break;
                 }
             }
-            if (uni)
+            if (uni && CheckDimensions(rotated))
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 orientations.Add(m);
@@ -256,7 +266,7 @@ namespace PuzzleSolver
                     break;
                 }
             }
-            if (uni)
+            if (uni && CheckDimensions(rotated))
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 orientations.Add(m);

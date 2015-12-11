@@ -67,6 +67,16 @@ namespace PuzzleSolver
             }
             pieces.Sort();
         }
+        public void PrintSol(char[,] running_sol){
+            for(int i = 0; i < running_sol.GetLength(0); i++){
+                for(int j = 0; j < running_sol.GetLength(1); j++){
+                    Console.Write(running_sol[i,j]);
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+            Console.ReadKey();
+        }
 //Recursive function, takes an all space 2D array and the parsed 2D array (same size), the two indices, and the array sizes (for convenience)
 //Changes the value at i,j in tile to the value at i,j in all_tiles, sets that value to be insignificant in all_tiles, then checks all relevant directions
 //For the significance of the char at each of those spots, calling itself on that char if that char is significant
@@ -105,6 +115,7 @@ namespace PuzzleSolver
             foreach(Tile t in pieces){
                 t.sol_c = sol_co;
                 t.sol_r = sol_ro;
+                t.FindOrientations(t.dimensions, t.csize, t.rsize);
                 t.FindPositions();
             }
             int sol_size = pieces[pieces.Count -1].size;
@@ -155,14 +166,14 @@ namespace PuzzleSolver
                                         new_solution[n,m] = running_solution[n,m];
                                     }
                                 }
-                                Console.WriteLine("Checking solution...");
                                 if(solution.CheckValid(new_solution)){
                                     solutions.Add(new_solution);
-                                    Console.WriteLine("Solution Added");
+                                    found = true;
                                 }
-                                found = true;
                                 biggest.RemoveFromSolution(running_solution, i, j, g);
-                                break;
+                                if(found){
+                                    break;
+                                }
                             }
                             else{
                                 SolutionRecursion(smaller_pieces, solutions, running_solution, csize, rsize);
