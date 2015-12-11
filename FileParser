@@ -60,12 +60,11 @@ namespace PuzzleSolver
                     }
                     CreateTile(new_tile, lines, n, m, col_length, row_length);
                     Tile t = new Tile(new_tile, row_length, col_length);
-                    Console.WriteLine(t.size);
                     pieces.Add(t);
                     }
                 }
             }
-            Console.ReadKey();
+            pieces.Sort();
         }
 //Recursive function, takes an all space 2D array and the parsed 2D array (same size), the two indices, and the array sizes (for convenience)
 //Changes the value at i,j in tile to the value at i,j in all_tiles, sets that value to be insignificant in all_tiles, then checks all relevant directions
@@ -94,11 +93,118 @@ namespace PuzzleSolver
                 }
             }
         }
+//Check all the sizes of tiles to see if solution tile is the same size or smaller than sum of other tiles
+//If smaller, check to see if equal to some sum of other tile sizes
+//Also sets largest tile as the solution piece
+        public int CheckSizes(){
+            pieces[pieces.Count-1].solution = true;
+            int sol_co = pieces[pieces.Count-1].csize;
+            int sol_ro = pieces[pieces.Count-1].rsize;
+            foreach(Tile t in pieces){
+                t.sol_c = sol_co;
+                t.sol_r = sol_ro;
+                t.FindPositions();
+            }
+            int sol_size = pieces[pieces.Count -1].size;
+            int sum = 0;
+            for(int i = 0; i < pieces.Count-1 ; i++){
+                sum += pieces[i].size;
+            }
+            if(sum == sol_size){
+                return 1;
+            }
+            else if(sum < sol_size){
+                return -1;
+            }
+            else{
+ /*             int diff = sum - sol_size;
+                List<Tile> removable_tiles = new List<Tile>;
+                if(pieces[0].size > diff){
+                    return -1;
+                }
+                foreach(Tile t in pieces){
+                    if(t.size == diff){
+                        return 0;
+                    }
+                    else if(t.size < diff){
+                        
+                    } */
+                return 0; 
+            }
+        }
+//CURRENTLY: Finds all possible solutions given all possible placements of the tiles on the solutions space
+//FUTURE: Checks validity of solution, removes possible solutions which already are shown to be impossible
+//FUTURE: Implements rotations and reflections
+//FUTURE: Checks to eliminate repeated solutions
+        public void FindSolutions(){
+            List<Tile> options = new List<Tile>();
+            Tile solution = pieces[pieces.Count -1];
+            int pot_sol = 1;
+            foreach(Tile t in pieces){
+                if(t.solution == false){
+                    options.Add(t);
+                }
+            }
+            foreach(Tile t in options){
+                pot_sol = pot_sol * t.positions;
+            }
+            int repeats = pot_sol;
+            List<char[,]> running_sols = new List<char[,]>();
+            Console.WriteLine(pot_sol);
+            for(int k = 0; k < pot_sol; k++){
+                char[,] blank_sol = new char[solution.csize, solution.rsize];
+                for(int i = 0; i < solution.csize; i++){
+                    for(int j = 0; j < solution.rsize; j++){
+                        blank_sol[i,j] = ' ';
+                    }
+                }
+                running_sols.Add(blank_sol);
+            }
+            options.Reverse();
+            int sec_repeat = 1;
+            foreach(Tile t in options){
+                Console.WriteLine(t.c_off);
+                Console.WriteLine(t.r_off);
+                repeats = repeats/t.positions;
+                Console.WriteLine(repeats);
+                Console.ReadKey();
+                int itr = 0;
+                for(int v = 0; v < sec_repeat; v++){
+                    for(int n = 0; n < t.c_off; n++){
+                        for(int m = 0; m < t.r_off; m++){
+                            for(int r = 0; r < repeats; r++){
+                                t.PlaceInSolution(running_sols[itr], n, m);
+                                itr++;
+                            }
+                        }
+                    }
+                }
+                sec_repeat = t.positions;
+            }
+            for(int x = 0; x < 48; x++){
+                for(int a = 0; a < solution.csize; a++){
+                    for(int b = 0; b < solution.rsize; b++){
+                        Console.Write(running_sols[x][a,b]);
+                    }
+                    Console.WriteLine();
+                }
+                Console.WriteLine();
+            }  
+            Console.ReadKey(); 
+        } 
     }
     class ParseTester{
         static void Main(){
             Parser p = new Parser("C:\\Users\\Xeny\\trivial.txt");
             p.Parse();
+            int i = p.CheckSizes();
+            if(i == -1){
+                Console.WriteLine("No solution possible");
+            }
+            else if(i == 0){
+                Console.WriteLine("Some pieces may not be used if a solution is found");
+            }
+            p.FindSolutions();
         }
     }
 }
