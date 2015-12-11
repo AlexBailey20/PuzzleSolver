@@ -144,39 +144,41 @@ namespace PuzzleSolver
             }
             Tile biggest = pieces[0];
             bool found = false;
-            for(int i = 0; i < biggest.c_off; i++){
-                for(int j = 0; j < biggest.r_off; j++){
-                    if(biggest.PlaceInSolution(running_solution, i, j)){
-                        if(smaller_pieces.Count == 0){
-                            char [,] new_solution = new char[csize, rsize];
-                            for(int n = 0; n < csize; n++){
-                                for(int m = 0; m < rsize; m++){
-                                    new_solution[n,m] = running_solution[n,m];
+            for(int g = 0; g < biggest.orientations.Count; g++){
+                for(int i = 0; i < biggest.orientations[g].c_off; i++){
+                    for(int j = 0; j < biggest.orientations[g].r_off; j++){
+                        if(biggest.PlaceInSolution(running_solution, i, j, g)){
+                            if(smaller_pieces.Count == 0){
+                                char [,] new_solution = new char[csize, rsize];
+                                for(int n = 0; n < csize; n++){
+                                    for(int m = 0; m < rsize; m++){
+                                        new_solution[n,m] = running_solution[n,m];
+                                    }
                                 }
+                                Console.WriteLine("Checking solution...");
+                                if(solution.CheckValid(new_solution)){
+                                    solutions.Add(new_solution);
+                                    Console.WriteLine("Solution Added");
+                                }
+                                found = true;
+                                biggest.RemoveFromSolution(running_solution, i, j, g);
+                                break;
                             }
-                            Console.WriteLine("Checking solution...");
-                            if(solution.CheckValid(new_solution)){
-                                solutions.Add(new_solution);
-                                Console.WriteLine("Solution Added");
+                            else{
+                                SolutionRecursion(smaller_pieces, solutions, running_solution, csize, rsize);
+                                biggest.RemoveFromSolution(running_solution, i, j, g);
                             }
-                            found = true;
-                            biggest.RemoveFromSolution(running_solution, i, j);
-                            break;
                         }
-                        else{
-                            SolutionRecursion(smaller_pieces, solutions, running_solution, csize, rsize);
-                            biggest.RemoveFromSolution(running_solution, i, j);
-                        }
+                    if(found){
+                        found = false;
+                        break;
+                    }
                     }
                 if(found){
                     found = false;
                     break;
                 }
                 }
-            if(found){
-                found = false;
-                break;
-            }
             }
             return solutions;
         }

@@ -9,6 +9,7 @@ namespace PuzzleSolver
     class Tile : IComparable
     {
         public char[,] dimensions;
+        public List<Orientation> orientations;
         public int size;
         public int rsize;
         public int csize;
@@ -22,6 +23,7 @@ namespace PuzzleSolver
         public Tile(char[,] input, int row, int col)
         {
             dimensions = input;
+            orientations = new List<Orientation>();
             rsize = row;
             csize = col;
             size = 0;
@@ -33,6 +35,7 @@ namespace PuzzleSolver
             char c = ' ';
             solution = false;
             this.Compress();
+            FindOrientations(dimensions, rsize, csize);
             for(int i=0; i < csize; i++)
             {
                 for(int j = 0; j < rsize; j++)
@@ -44,7 +47,7 @@ namespace PuzzleSolver
                 }
             }
         }
-//Comparator method for sorting array to find solution and to optimize algorithm slightly by placing largest tiles first
+        //Comparator method for sorting array to find solution and to optimize algorithm slightly by placing largest tiles first
         public int CompareTo(object obj)
         {
             if (obj == null) return 1;
@@ -60,9 +63,10 @@ namespace PuzzleSolver
 //Method which finds the number of different ways the Tile can be placed on the blank solution array
         public void FindPositions()
         {
-            this.c_off = sol_c - csize + 1;
-            this.r_off = sol_r - rsize + 1;
-            this.positions = c_off * r_off;
+            for(int i = 0; i < orientations.Count; i++)
+            {
+                orientations[i].FindPos(sol_c, sol_r);
+            }
         }
 //Compares each element in the potential_solution to the actual solution. Bounds are safe as both are defined by the same values
         public bool CheckValid(char[,] potential_solution)
@@ -80,13 +84,13 @@ namespace PuzzleSolver
             return true;
         }
 //Method to check if adding tile will overlap with any tiles already added
-        public bool CheckOverlap(char[,] potential_solution, int col_offset, int row_offset)
+        public bool CheckOverlap(char[,] potential_solution, int col_offset, int row_offset, int g)
         {
-            for (int i = 0; i < csize; i++)
+            for (int i = 0; i < orientations[g].dimensions.GetLength(0); i++)
             {
-                for (int j = 0; j < rsize; j++)
+                for (int j = 0; j < orientations[g].dimensions.GetLength(1); j++)
                 {
-                    if (dimensions[i, j] != ' ')
+                    if (orientations[g].dimensions[i, j] != ' ')
                     {
                         if (potential_solution[i + col_offset, j + row_offset] != ' ')
                         {
@@ -98,39 +102,172 @@ namespace PuzzleSolver
             return true;
         }
 //Method which takes a potential solution and a placement of this tile on that solution space, adds the tile to that solution space
-        public bool PlaceInSolution(char[,] potential_solution, int col_offset, int row_offset)
+        public bool PlaceInSolution(char[,] potential_solution, int col_offset, int row_offset, int g)
         {
-            if(!CheckOverlap(potential_solution, col_offset, row_offset))
+            if(!CheckOverlap(potential_solution, col_offset, row_offset, g))
             {
                 return false;
             }
-            for(int i = 0; i < csize; i++)
+            for(int i = 0; i < orientations[g].dimensions.GetLength(0); i++)
             {
-                for(int j = 0; j < rsize; j++)
+                for(int j = 0; j < orientations[g].dimensions.GetLength(1); j++)
                 {
-                    if (dimensions[i, j] != ' ')
+                    if (orientations[g].dimensions[i, j] != ' ')
                     {                        
-                        potential_solution[i + col_offset, j + row_offset] = dimensions[i, j];
+                        potential_solution[i + col_offset, j + row_offset] = orientations[g].dimensions[i, j];
                     }
                 }
             }
             return true;
         }
 //Takes the tile and removes it from the running possible solution array based on the current offsets being used
-        public void RemoveFromSolution(char[,] potential_solution, int col_offset, int row_offset)
+        public void RemoveFromSolution(char[,] potential_solution, int col_offset, int row_offset, int g)
         {
-            for (int i = 0; i < csize; i++)
+            for (int i = 0; i < orientations[g].dimensions.GetLength(0); i++)
             {
-                for (int j = 0; j < rsize; j++)
+                for (int j = 0; j < orientations[g].dimensions.GetLength(1); j++)
                 {
-                    if (dimensions[i, j] != ' ')
+                    if (orientations[g].dimensions[i, j] != ' ')
                     {
                         potential_solution[i + col_offset, j + row_offset] = ' ';
                     }
                 }
             }
         }
-//Method to take the Tile dimensions and shrink them to the smallest possible rectangle around the Tile
+        //Method to find each unique rotation and reflection for this tile
+        public void FindOrientations(char[,] initial_orientation, int csize, int rsize)
+        {
+            Orientation o1 = new Orientation(initial_orientation, csize, rsize);
+            orientations.Add(o1);
+            Reflect(initial_orientation);
+            Rotate90(initial_orientation);
+            Rotate180(initial_orientation);
+            Rotate270(initial_orientation);
+        }
+//Method which reflects a 2D char array, checks if its a unique orientation, and potentially adds it to the list of orientations
+        public void Reflect(char[,] initial_orientation)
+        {
+            char[,] reflected = new char[initial_orientation.GetLength(0), initial_orientation.GetLength(1)];
+            for(int i = 0; i < initial_orientation.GetLength(0); i++)
+            {
+                for(int j = 0; j < initial_orientation.GetLength(1); j++)
+                {
+                    reflected[i, j] = initial_orientation[initial_orientation.GetLength(0) - i - 1, j];
+                }
+            }
+            bool uni = true;
+            for(int n = 0; n < orientations.Count; n++)
+            {
+                if (orientations[n].CheckSame(reflected))
+                {
+                    uni = false;
+                    break;
+                }
+            }
+            if (uni)
+            {
+                Orientation m = new Orientation(reflected, reflected.GetLength(0), reflected.GetLength(1));
+                orientations.Add(m);
+            }
+        }
+//Methods which rotate a 2D char array either 90, 180, or 270 degrees and checks its uniqueness, then calls reflect on the rotated version
+        public void Rotate90(char[,] o)
+        {
+            char[,] rotated = new char[o.GetLength(1), o.GetLength(0)];
+            bool uni = true;
+            int r = 0;
+            for (int i = 0; i < o.GetLength(1); i++)
+            {
+                for (int j = 0; j < o.GetLength(0); j++)
+                {
+                    rotated[i, j] = o[j, o.GetLength(1) - i - 1];
+                }
+            }
+            for (int n = 0; n < orientations.Count; n++)
+            {
+                if (orientations[n].CheckSame(rotated))
+                {
+                    uni = false;
+                    r = n;
+                    break;
+                }
+            }
+            if (uni)
+            {
+                Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
+                orientations.Add(m);
+                Reflect(rotated);
+            }
+            else
+            {
+                Reflect(orientations[r].dimensions);
+            }
+        }
+        public void Rotate180(char[,] o)
+        {
+            char[,] rotated = new char[o.GetLength(0), o.GetLength(1)];
+            bool uni = true;
+            int r = 0;
+            for (int i = 0; i < o.GetLength(0); i++)
+            {
+                for (int j = 0; j < o.GetLength(1); j++)
+                {
+                    rotated[i, j] = o[o.GetLength(0) - i - 1, o.GetLength(1) - j - 1];
+                }
+            }
+            for (int n = 0; n < orientations.Count; n++)
+            {
+                if (orientations[n].CheckSame(rotated))
+                {
+                    uni = false;
+                    r = n;
+                    break;
+                }
+            }
+            if (uni)
+            {
+                Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
+                orientations.Add(m);
+                Reflect(rotated);
+            }
+            else
+            {
+                Reflect(orientations[r].dimensions);
+            }
+        }
+        public void Rotate270(char[,] o)
+        {
+            char[,] rotated = new char[o.GetLength(1), o.GetLength(0)];
+            bool uni = true;
+            int r = 0;
+            for (int i = 0; i < o.GetLength(1); i++)
+            {
+                for (int j = 0; j < o.GetLength(0); j++)
+                {
+                    rotated[i, j] = o[o.GetLength(0) - j - 1, i];
+                }
+            }
+            for (int n = 0; n < orientations.Count; n++)
+            {
+                if (orientations[n].CheckSame(rotated))
+                {
+                    uni = false;
+                    r = n;
+                    break;
+                }
+            }
+            if (uni)
+            {
+                Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
+                orientations.Add(m);
+                Reflect(rotated);
+            }
+            else
+            {
+                Reflect(orientations[r].dimensions);
+            }
+        }
+        //Method to take the Tile dimensions and shrink them to the smallest possible rectangle around the Tile
         public void Compress()
         {
             int min_i = csize;
