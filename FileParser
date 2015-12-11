@@ -6,7 +6,8 @@ namespace PuzzleSolver
     class Parser
     {
         private string file;
-        private List<Tile> pieces;
+        public List<Tile> pieces;
+        public Tile solution;
 //Read the file (file is currently hardcoded in), return all the lines as an array of strings
         public string[] ReadFile()
         {
@@ -98,6 +99,7 @@ namespace PuzzleSolver
 //Also sets largest tile as the solution piece
         public int CheckSizes(){
             pieces[pieces.Count-1].solution = true;
+            solution = pieces[pieces.Count-1];
             int sol_co = pieces[pieces.Count-1].csize;
             int sol_ro = pieces[pieces.Count-1].rsize;
             foreach(Tile t in pieces){
@@ -132,66 +134,52 @@ namespace PuzzleSolver
                 return 0; 
             }
         }
-//CURRENTLY: Finds all possible solutions given all possible placements of the tiles on the solutions space
-//FUTURE: Checks validity of solution, removes possible solutions which already are shown to be impossible
-//FUTURE: Implements rotations and reflections
-//FUTURE: Checks to eliminate repeated solutions
-        public void FindSolutions(){
-            List<Tile> options = new List<Tile>();
-            Tile solution = pieces[pieces.Count -1];
-            int pot_sol = 1;
-            foreach(Tile t in pieces){
-                if(t.solution == false){
-                    options.Add(t);
-                }
+//Recursive function to check every combination of tile placements. Starting from the biggest tile, from each position that tile can take it calls the
+//function on the next biggest tile. If at any point there is overlap, the tile is removed and the next possible branch is explored.
+//Once a possible solution is found, it is checked against the solution tile and added (if valid) to the solution list which is returned
+        public List<char[,]> SolutionRecursion(List<Tile> pieces, List<char[,]> solutions, char [,] running_solution, int csize, int rsize){
+            List<Tile> smaller_pieces = new List<Tile>();
+            for(int t = 1; t < pieces.Count; t++){
+                smaller_pieces.Add(pieces[t]);
             }
-            foreach(Tile t in options){
-                pot_sol = pot_sol * t.positions;
-            }
-            int repeats = pot_sol;
-            List<char[,]> running_sols = new List<char[,]>();
-            Console.WriteLine(pot_sol);
-            for(int k = 0; k < pot_sol; k++){
-                char[,] blank_sol = new char[solution.csize, solution.rsize];
-                for(int i = 0; i < solution.csize; i++){
-                    for(int j = 0; j < solution.rsize; j++){
-                        blank_sol[i,j] = ' ';
-                    }
-                }
-                running_sols.Add(blank_sol);
-            }
-            options.Reverse();
-            int sec_repeat = 1;
-            foreach(Tile t in options){
-                Console.WriteLine(t.c_off);
-                Console.WriteLine(t.r_off);
-                repeats = repeats/t.positions;
-                Console.WriteLine(repeats);
-                Console.ReadKey();
-                int itr = 0;
-                for(int v = 0; v < sec_repeat; v++){
-                    for(int n = 0; n < t.c_off; n++){
-                        for(int m = 0; m < t.r_off; m++){
-                            for(int r = 0; r < repeats; r++){
-                                t.PlaceInSolution(running_sols[itr], n, m);
-                                itr++;
+            Tile biggest = pieces[0];
+            bool found = false;
+            for(int i = 0; i < biggest.c_off; i++){
+                for(int j = 0; j < biggest.r_off; j++){
+                    if(biggest.PlaceInSolution(running_solution, i, j)){
+                        if(smaller_pieces.Count == 0){
+                            char [,] new_solution = new char[csize, rsize];
+                            for(int n = 0; n < csize; n++){
+                                for(int m = 0; m < rsize; m++){
+                                    new_solution[n,m] = running_solution[n,m];
+                                }
                             }
+                            Console.WriteLine("Checking solution...");
+                            if(solution.CheckValid(new_solution)){
+                                solutions.Add(new_solution);
+                                Console.WriteLine("Solution Added");
+                            }
+                            found = true;
+                            biggest.RemoveFromSolution(running_solution, i, j);
+                            break;
+                        }
+                        else{
+                            SolutionRecursion(smaller_pieces, solutions, running_solution, csize, rsize);
+                            biggest.RemoveFromSolution(running_solution, i, j);
                         }
                     }
+                if(found){
+                    found = false;
+                    break;
                 }
-                sec_repeat = t.positions;
+                }
+            if(found){
+                found = false;
+                break;
             }
-            for(int x = 0; x < 48; x++){
-                for(int a = 0; a < solution.csize; a++){
-                    for(int b = 0; b < solution.rsize; b++){
-                        Console.Write(running_sols[x][a,b]);
-                    }
-                    Console.WriteLine();
-                }
-                Console.WriteLine();
-            }  
-            Console.ReadKey(); 
-        } 
+            }
+            return solutions;
+        }
     }
     class ParseTester{
         static void Main(){
@@ -204,7 +192,31 @@ namespace PuzzleSolver
             else if(i == 0){
                 Console.WriteLine("Some pieces may not be used if a solution is found");
             }
-            p.FindSolutions();
+            List<Tile> options = new List<Tile>();
+            char[,] blank_sol = new char[p.solution.csize, p.solution.rsize];
+            for(int k = 0; k < p.solution.csize; k++){
+                for(int j = 0; j < p.solution.rsize; j++){
+                    blank_sol[k,j] = ' ';
+                }
+            }
+            foreach(Tile t in p.pieces){
+                if(t.solution == false){
+                    options.Add(t);
+                }
+            }
+            options.Reverse();
+            List<char[,]> found_solutions = new List<char[,]>();
+            List<char[,]> solus = p.SolutionRecursion(options, found_solutions, blank_sol, p.solution.csize, p.solution.rsize);
+            for(int x = 0; x < solus.Count; x++){
+                Console.WriteLine("Solution "+(x+1));
+                for(int y = 0; y < p.solution.csize; y++){
+                    for(int z = 0; z < p.solution.rsize; z++){
+                        Console.Write(solus[x][y,z]);
+                    }
+                    Console.WriteLine();
+                }
+            }
+            Console.ReadKey();
         }
     }
 }

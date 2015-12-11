@@ -64,16 +64,68 @@ namespace PuzzleSolver
             this.r_off = sol_r - rsize + 1;
             this.positions = c_off * r_off;
         }
-//Method which takes a potential solution and a placement of this tile on that solution space, adds the tile to that solution space
-        public void PlaceInSolution(char[,] potential_solution, int col_offset, int row_offset)
+//Compares each element in the potential_solution to the actual solution. Bounds are safe as both are defined by the same values
+        public bool CheckValid(char[,] potential_solution)
         {
             for(int i = 0; i < csize; i++)
             {
                 for(int j = 0; j < rsize; j++)
                 {
+                    if(potential_solution[i,j] != dimensions[i, j])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+//Method to check if adding tile will overlap with any tiles already added
+        public bool CheckOverlap(char[,] potential_solution, int col_offset, int row_offset)
+        {
+            for (int i = 0; i < csize; i++)
+            {
+                for (int j = 0; j < rsize; j++)
+                {
                     if (dimensions[i, j] != ' ')
                     {
+                        if (potential_solution[i + col_offset, j + row_offset] != ' ')
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+//Method which takes a potential solution and a placement of this tile on that solution space, adds the tile to that solution space
+        public bool PlaceInSolution(char[,] potential_solution, int col_offset, int row_offset)
+        {
+            if(!CheckOverlap(potential_solution, col_offset, row_offset))
+            {
+                return false;
+            }
+            for(int i = 0; i < csize; i++)
+            {
+                for(int j = 0; j < rsize; j++)
+                {
+                    if (dimensions[i, j] != ' ')
+                    {                        
                         potential_solution[i + col_offset, j + row_offset] = dimensions[i, j];
+                    }
+                }
+            }
+            return true;
+        }
+//Takes the tile and removes it from the running possible solution array based on the current offsets being used
+        public void RemoveFromSolution(char[,] potential_solution, int col_offset, int row_offset)
+        {
+            for (int i = 0; i < csize; i++)
+            {
+                for (int j = 0; j < rsize; j++)
+                {
+                    if (dimensions[i, j] != ' ')
+                    {
+                        potential_solution[i + col_offset, j + row_offset] = ' ';
                     }
                 }
             }
