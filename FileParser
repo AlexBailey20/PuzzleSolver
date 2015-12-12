@@ -7,7 +7,10 @@ namespace PuzzleSolver
     {
         private string file;
         public List<Tile> pieces;
+        public List<int[,]> color_codes;
         public Tile solution;
+        public int smallest;
+        public int code;
 //Read the file (file is currently hardcoded in), return all the lines as an array of strings
         public string[] ReadFile()
         {
@@ -22,7 +25,9 @@ namespace PuzzleSolver
 //Basic constructer, takes in file_name and creates pieces List
         public Parser(string file_name){
             file = file_name;
+            code = 0;
             pieces = new List<Tile>();
+            color_codes = new List<int[,]>();
         }
 //Takes the string array of all lines, finds the number of rows and the max row length to create rectangular 2D array
 //Transfers the string array into the 2D array of chars, iterates through each char in the array, if the char is significant, send it to CreateTile()
@@ -60,7 +65,8 @@ namespace PuzzleSolver
                         }
                     }
                     CreateTile(new_tile, lines, n, m, col_length, row_length);
-                    Tile t = new Tile(new_tile, row_length, col_length);
+                    Tile t = new Tile(new_tile, row_length, col_length, code);
+                    code += 1;
                     pieces.Add(t);
                     }
                 }
@@ -110,6 +116,7 @@ namespace PuzzleSolver
         public int CheckSizes(){
             pieces[pieces.Count-1].solution = true;
             solution = pieces[pieces.Count-1];
+            smallest = pieces[0].size;
             int sol_co = pieces[pieces.Count-1].csize;
             int sol_ro = pieces[pieces.Count-1].rsize;
             foreach(Tile t in pieces){
@@ -145,10 +152,16 @@ namespace PuzzleSolver
                 return 0; 
             }
         }
+        public void CheckDuplicateTiles(){
+            for(int i = 1; i < pieces.Count; i++)
+                if(pieces[i].size == pieces[i-1].size){
+                    pieces[i].CheckIsomorphic(pieces[i-1]);
+                }
+        }
 //Recursive function to check every combination of tile placements. Starting from the biggest tile, from each position that tile can take it calls the
 //function on the next biggest tile. If at any point there is overlap, the tile is removed and the next possible branch is explored.
 //Once a possible solution is found, it is checked against the solution tile and added (if valid) to the solution list which is returned
-        public List<char[,]> SolutionRecursion(List<Tile> pieces, List<char[,]> solutions, char [,] running_solution, int csize, int rsize){
+        public List<char[,]> SolutionRecursion(List<Tile> pieces, List<char[,]> solutions, char [,] running_solution, int[,] running_colors, int csize, int rsize){
             List<Tile> smaller_pieces = new List<Tile>();
             for(int t = 1; t < pieces.Count; t++){
                 smaller_pieces.Add(pieces[t]);
@@ -158,26 +171,33 @@ namespace PuzzleSolver
             for(int g = 0; g < biggest.orientations.Count; g++){
                 for(int i = 0; i < biggest.orientations[g].c_off; i++){
                     for(int j = 0; j < biggest.orientations[g].r_off; j++){
-                        if(biggest.PlaceInSolution(running_solution, i, j, g)){
+                        if(biggest.PlaceInSolution(running_solution, running_colors, i, j, g)){
+                            if(solution.RunningCheck(running_solution)){
+                                biggest.RemoveFromSolution(running_solution, running_colors, i, j, g);
+                                continue;
+                            }
                             if(smaller_pieces.Count == 0){
-                                char [,] new_solution = new char[csize, rsize];
-                                for(int n = 0; n < csize; n++){
-                                    for(int m = 0; m < rsize; m++){
-                                        new_solution[n,m] = running_solution[n,m];
+                                if(solution.CheckValid(running_solution)&&solution.CheckNewSolution(running_colors, color_codes)){
+                                    char [,] new_solution = new char[csize, rsize];
+                                    int [,] new_colors = new int[csize, rsize];
+                                    for(int n = 0; n < csize; n++){
+                                        for(int m = 0; m < rsize; m++){
+                                            new_solution[n,m] = running_solution[n,m];
+                                            new_colors[n,m] = running_colors[n,m];
+                                        }
                                     }
-                                }
-                                if(solution.CheckValid(new_solution)){
                                     solutions.Add(new_solution);
+                                    color_codes.Add(new_colors);
                                     found = true;
                                 }
-                                biggest.RemoveFromSolution(running_solution, i, j, g);
+                                biggest.RemoveFromSolution(running_solution, running_colors, i, j, g);
                                 if(found){
                                     break;
                                 }
                             }
                             else{
-                                SolutionRecursion(smaller_pieces, solutions, running_solution, csize, rsize);
-                                biggest.RemoveFromSolution(running_solution, i, j, g);
+                                SolutionRecursion(smaller_pieces, solutions, running_solution, running_colors, csize, rsize);
+                                biggest.RemoveFromSolution(running_solution, running_colors, i, j, g);
                             }
                         }
                     if(found){
@@ -205,11 +225,14 @@ namespace PuzzleSolver
             else if(i == 0){
                 Console.WriteLine("Some pieces may not be used if a solution is found");
             }
+            p.CheckDuplicateTiles();
             List<Tile> options = new List<Tile>();
             char[,] blank_sol = new char[p.solution.csize, p.solution.rsize];
+            int[,] blank_colors = new int[p.solution.csize, p.solution.rsize];
             for(int k = 0; k < p.solution.csize; k++){
                 for(int j = 0; j < p.solution.rsize; j++){
                     blank_sol[k,j] = ' ';
+                    blank_colors[k,j] = -1;
                 }
             }
             foreach(Tile t in p.pieces){
@@ -219,7 +242,7 @@ namespace PuzzleSolver
             }
             options.Reverse();
             List<char[,]> found_solutions = new List<char[,]>();
-            List<char[,]> solus = p.SolutionRecursion(options, found_solutions, blank_sol, p.solution.csize, p.solution.rsize);
+            List<char[,]> solus = p.SolutionRecursion(options, found_solutions, blank_sol, blank_colors, p.solution.csize, p.solution.rsize);
             for(int x = 0; x < solus.Count; x++){
                 Console.WriteLine("Solution "+(x+1));
                 for(int y = 0; y < p.solution.csize; y++){
@@ -229,6 +252,18 @@ namespace PuzzleSolver
                     Console.WriteLine();
                 }
             }
+            for(int q = 0; q < p.color_codes.Count; q++){
+                Console.WriteLine("Color_Codes "+(q+1));
+                for(int s = 0; s < p.solution.csize; s++){
+                    for(int f = 0; f < p.solution.rsize; f++){
+                        Console.Write(p.color_codes[q][s,f]);
+                    }
+                    Console.WriteLine();
+                }
+            }
+            Console.ReadKey();
+            Console.ReadKey();
+            Console.WriteLine("Finished");
             Console.ReadKey();
         }
     }

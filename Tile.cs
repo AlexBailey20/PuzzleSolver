@@ -18,11 +18,13 @@ namespace PuzzleSolver
         public int sol_r;
         public int c_off;
         public int r_off;
+        public int color_code;
         public bool solution;
 //Constructor, takes a 2D char array and finds the number of chars which are significant (non-space)
-        public Tile(char[,] input, int row, int col)
+        public Tile(char[,] input, int row, int col, int code)
         {
             dimensions = input;
+            color_code = code;
             orientations = new List<Orientation>();
             rsize = row;
             csize = col;
@@ -43,6 +45,16 @@ namespace PuzzleSolver
                     {
                         size += 1;
                     }
+                }
+            }
+        }
+        public void CheckIsomorphic(Tile t)
+        {
+            for(int i = 0; i < t.orientations.Count; i++)
+            {
+                if (t.orientations[i].CheckSame(dimensions))
+                {
+                    color_code = t.color_code;
                 }
             }
         }
@@ -82,7 +94,139 @@ namespace PuzzleSolver
             }
             return true;
         }
-//Method to check if adding tile will overlap with any tiles already added
+        public bool CheckNewSolution(int[,] running_colors, List<int[,]> color_solutions)
+        {
+            bool repeated_solution = true;
+            for(int i = 0; i < color_solutions.Count; i++)
+            {
+                repeated_solution = true;
+                for(int j = 0; j < running_colors.GetLength(0); j++)
+                {
+                    for(int k = 0; k < running_colors.GetLength(1); k++)
+                    {
+                        if(running_colors[j,k] != color_solutions[i][j, k])
+                        {
+                            repeated_solution = false;
+                            break;
+                        }
+                    }
+                    if (!repeated_solution)
+                    {
+                        break;
+                    }
+                }
+                if (repeated_solution)
+                {
+                    return false;
+                }
+            }
+            return CheckAgainstSolutionRotations(running_colors, color_solutions);
+        }
+        public bool CheckAgainstSolutionRotations(int[,] running_colors, List<int[,]> color_solutions)
+        {
+            for(int i = 0; i < color_solutions.Count; i++)
+            {
+                if(CheckReflection(running_colors, color_solutions[i]) || CheckRotation90(running_colors, color_solutions[i]) || CheckRotation180(running_colors, color_solutions[i]) || CheckRotation270(running_colors, color_solutions[i])){
+                    return false;
+                }
+
+            }
+            return true;
+        }
+        public bool CheckReflection(int[,] running_colors, int[,] color_solution)
+        {
+            if(running_colors.GetLength(0) != color_solution.GetLength(0) || running_colors.GetLength(1) != color_solution.GetLength(1))
+            {
+                return false;
+            }
+            for (int i = 0; i < running_colors.GetLength(0); i++)
+            {
+                for (int j = 0; j < running_colors.GetLength(1); j++)
+                {
+                    if (running_colors[i, j] != color_solution[color_solution.GetLength(0) - i - 1, j])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        public bool CheckRotation90(int[,] running_colors, int[,] color_solution)
+        {
+            if (running_colors.GetLength(1) != color_solution.GetLength(0) || running_colors.GetLength(0) != color_solution.GetLength(1))
+            {
+                return false;
+            }
+            bool refl = true;
+            int[,] reflected = new int[color_solution.GetLength(1), color_solution.GetLength(0)];
+            for (int i = 0; i < running_colors.GetLength(0); i++)
+            {
+                for (int j = 0; j < running_colors.GetLength(1); j++)
+                {
+                    reflected[i, j] = color_solution[j, running_colors.GetLength(1) - i - 1];
+                    if (running_colors[i, j] != color_solution[j, running_colors.GetLength(1) - i - 1])
+                    {
+                        refl = false;
+                    }
+                }
+            }
+            if (refl)
+            {
+                return true;
+            }
+            return CheckReflection(running_colors, reflected);
+        }
+        public bool CheckRotation180(int[,] running_colors, int[,] color_solution)
+        {
+            if (running_colors.GetLength(0) != color_solution.GetLength(0) || running_colors.GetLength(1) != color_solution.GetLength(1))
+            {
+                return false;
+            }
+            bool refl = true;
+            int[,] reflected = new int[color_solution.GetLength(0), color_solution.GetLength(1)];
+            for (int i = 0; i < running_colors.GetLength(0); i++)
+            {
+                for (int j = 0; j < running_colors.GetLength(1); j++)
+                {
+                    reflected[i, j] = color_solution[color_solution.GetLength(0) - i - 1, color_solution.GetLength(1) - j - 1];
+                    if (running_colors[i, j] != color_solution[color_solution.GetLength(0) - i - 1, color_solution.GetLength(1) - j - 1])
+                    {
+                        refl = false;
+                    }
+                }
+            }
+            if (refl)
+            {
+                return true;
+            }
+            return CheckReflection(running_colors, reflected);
+        }
+        public bool CheckRotation270(int[,] running_colors, int[,] color_solution)
+        {
+            if (running_colors.GetLength(1) != color_solution.GetLength(0) || running_colors.GetLength(0) != color_solution.GetLength(1))
+            {
+                return false;
+            }
+            bool refl = true;
+            int[,] reflected = new int[color_solution.GetLength(1), color_solution.GetLength(0)];
+            for (int i = 0; i < running_colors.GetLength(0); i++)
+            {
+                for (int j = 0; j < running_colors.GetLength(1); j++)
+                {
+                    reflected[i, j] = color_solution[color_solution.GetLength(0) - j - 1, i];
+                    if (running_colors[i, j] != color_solution[color_solution.GetLength(0) - j - 1, i])
+                    {
+                        refl = false;
+                    }
+                }
+            }
+            if (refl)
+            {
+                return true;
+            }
+            return CheckReflection(running_colors, reflected);
+        }
+        //Method to check if adding tile will overlap with any tiles already added
         public bool CheckOverlap(char[,] potential_solution, int col_offset, int row_offset, int g)
         {
             for (int i = 0; i < orientations[g].dimensions.GetLength(0); i++)
@@ -101,7 +245,7 @@ namespace PuzzleSolver
             return true;
         }
 //Method which takes a potential solution and a placement of this tile on that solution space, adds the tile to that solution space
-        public bool PlaceInSolution(char[,] potential_solution, int col_offset, int row_offset, int g)
+        public bool PlaceInSolution(char[,] potential_solution, int[,] potential_colors, int col_offset, int row_offset, int g)
         {
             if(!CheckOverlap(potential_solution, col_offset, row_offset, g))
             {
@@ -114,13 +258,14 @@ namespace PuzzleSolver
                     if (orientations[g].dimensions[i, j] != ' ')
                     {                        
                         potential_solution[i + col_offset, j + row_offset] = orientations[g].dimensions[i, j];
+                        potential_colors[i + col_offset, j + row_offset] = color_code;
                     }
                 }
             }
             return true;
         }
-//Takes the tile and removes it from the running possible solution array based on the current offsets being used
-        public void RemoveFromSolution(char[,] potential_solution, int col_offset, int row_offset, int g)
+        //Takes the tile and removes it from the running possible solution array based on the current offsets being used
+        public void RemoveFromSolution(char[,] potential_solution, int[,] potential_colors, int col_offset, int row_offset, int g)
         {
             for (int i = 0; i < orientations[g].dimensions.GetLength(0); i++)
             {
@@ -129,11 +274,12 @@ namespace PuzzleSolver
                     if (orientations[g].dimensions[i, j] != ' ')
                     {
                         potential_solution[i + col_offset, j + row_offset] = ' ';
+                        potential_colors[i + col_offset, j + row_offset] = -1;
                     }
                 }
             }
         }
-        //Method to find each unique rotation and reflection for this tile
+//Method to find each unique rotation and reflection for this tile
         public void FindOrientations(char[,] initial_orientation, int csize, int rsize)
         {
             Orientation o1 = new Orientation(initial_orientation, csize, rsize);
@@ -142,9 +288,6 @@ namespace PuzzleSolver
             Rotate90(initial_orientation);
             Rotate180(initial_orientation);
             Rotate270(initial_orientation);
-            Console.WriteLine(size);
-            Console.WriteLine(orientations.Count);
-            Console.ReadKey();
         }
         public bool CheckDimensions(char[,] dims)
         {
@@ -153,6 +296,20 @@ namespace PuzzleSolver
                 return false;
             }
             return true;
+        }
+        public bool RunningCheck(char[,] pos_solution)
+        {
+            for(int i = 0; i < pos_solution.GetLength(0); i++)
+            {
+                for (int j = 0; j < pos_solution.GetLength(1); j++)
+                {
+                    if(pos_solution[i,j] != ' ' && pos_solution[i,j] != dimensions[i, j])
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 //Method which reflects a 2D char array, checks if its a unique orientation, and potentially adds it to the list of orientations
         public void Reflect(char[,] initial_orientation)
