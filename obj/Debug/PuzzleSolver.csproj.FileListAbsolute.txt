@@ -4,3 +4,6 @@ c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\bi
 c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\bin\Debug\PuzzleSolver.pdb
 c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\obj\Debug\PuzzleSolver.exe
 c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\obj\Debug\PuzzleSolver.pdb
+C:\Users\wesbonelli\Desktop\PuzzleSolver\bin\Debug\PuzzleSolver.exe.config
+C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.exe
+C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.pdb
