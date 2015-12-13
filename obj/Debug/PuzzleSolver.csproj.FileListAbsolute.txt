@@ -7,3 +7,8 @@ c:\users\xeny\documents\visual studio 2015\Projects\PuzzleSolver\PuzzleSolver\ob
 C:\Users\wesbonelli\Desktop\PuzzleSolver\bin\Debug\PuzzleSolver.exe.config
 C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.exe
 C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.pdb
+C:\Users\wesbonelli\Desktop\PuzzleSolver\bin\Debug\PuzzleSolver.exe
+C:\Users\wesbonelli\Desktop\PuzzleSolver\bin\Debug\PuzzleSolver.pdb
+C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.csprojResolveAssemblyReference.cache
+C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.GUI.resources
+C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.csproj.GenerateResource.Cache
