@@ -236,6 +236,55 @@ namespace PuzzleSolver
             return true;
         }
 
+        public bool CheckRotationalSymmetry()
+        {
+            if(dimensions.GetLength(0) != dimensions.GetLength(1))
+            {
+                return false;
+            }
+            for(int i = 0; i < dimensions.GetLength(0); i++)
+            {
+                for(int j = 0; j < dimensions.GetLength(1); j++)
+                {
+                    if(dimensions[i,j] != dimensions[j, dimensions.GetLength(1) - i - 1])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public bool CheckReflectedSymmetry()
+        {
+            for (int i = 0; i < dimensions.GetLength(0); i++)
+            {
+                for (int j = 0; j < dimensions.GetLength(1); j++)
+                {
+                    if (dimensions[i, j] != dimensions[dimensions.GetLength(0)-i-1, j])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public bool Check180Symmetry()
+        {
+            for (int i = 0; i < dimensions.GetLength(0); i++)
+            {
+                for (int j = 0; j < dimensions.GetLength(1); j++)
+                {
+                    if (dimensions[i, j] != dimensions[dimensions.GetLength(0) - i - 1, dimensions.GetLength(1) - j - 1])
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         //
         public bool CheckRotation90(int[,] runningcolors, int[,] colorsolution)
         {
@@ -472,6 +521,39 @@ namespace PuzzleSolver
         }
 
         // 
+        public void Fix(bool rotl, bool refl, bool turn)
+        {
+            if (rotl && refl)
+            {
+                Orientation o = orientations[0];
+                orientations.RemoveRange(0, orientations.Count);
+                orientations.Add(o);
+            }
+            else if(refl && turn && !rotl)
+            {
+                orientations.RemoveAt(7);
+                orientations.RemoveAt(6);
+                orientations.RemoveAt(5);
+                orientations.RemoveAt(4);
+                orientations.RemoveAt(3);
+                orientations.RemoveAt(1);
+            }
+            else if (refl && !turn)
+            {
+                orientations.RemoveAt(7);
+                orientations.RemoveAt(5);
+                orientations.RemoveAt(3);
+                orientations.RemoveAt(1);
+                    
+            }
+            else if (turn && !refl)
+            {
+                orientations.RemoveAt(7);
+                orientations.RemoveAt(6);
+                orientations.RemoveAt(5);
+                orientations.RemoveAt(4);
+            }
+        }
         public void Rotate180(char[,] o)
         {
             char[,] rotated = new char[o.GetLength(0), o.GetLength(1)];

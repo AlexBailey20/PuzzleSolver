@@ -76,6 +76,9 @@ namespace PuzzleSolver
             List<Tile> options = new List<Tile>();
             char[,] blanksolution = new char[Parser.Solution.cSize, Parser.Solution.rSize];
             int[,] blankcolors = new int[Parser.Solution.cSize, Parser.Solution.rSize];
+            bool rotl = false;
+            bool refl = false;
+            bool turn = false;
             for (int k = 0; k < Parser.Solution.cSize; k++)
             {
                 for (int j = 0; j < Parser.Solution.rSize; j++)
@@ -89,9 +92,24 @@ namespace PuzzleSolver
                 if (t.Solution == false)
                 {
                     options.Add(t);
+                    Parser.Pent = Parser.Pent && (t.Size == 5);
+                }
+                if (t.Solution)
+                {
+                    rotl = t.CheckRotationalSymmetry();
+                    refl = t.CheckReflectedSymmetry();
+                    turn = t.Check180Symmetry();
                 }
             }
             options.Reverse();
+            for(int w = 0; w < options.Count; w++)
+            {
+                if(options[w].Orientations.Count == 8)
+                {
+                    options[w].Fix(rotl, refl, turn);
+                    break;
+                }
+            }  
             List<char[,]> foundsolutions = new List<char[,]>();
             List<char[,]> solus = Parser.SolutionRecursion(options, foundsolutions, blanksolution, blankcolors, Parser.Solution.cSize, Parser.Solution.rSize);
             for (int x = 0; x < solus.Count; x++)
@@ -117,6 +135,10 @@ namespace PuzzleSolver
                     }
                     Console.WriteLine();
                 }
+            }
+            if(Parser.Colorcodes.Count == 0)
+            {
+                Console.WriteLine("No solution found");
             }
             Console.ReadKey();
             Console.ReadKey();
