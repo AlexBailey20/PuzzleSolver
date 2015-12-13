@@ -6,26 +6,51 @@ using System.Threading.Tasks;
 
 namespace PuzzleSolver
 {
-    class Orientation
+    public class Orientation
     {
-        public int c_off;
-        public int r_off;
-        public char[,] dimensions;
-        public int positions;
+        private int c_off;
+        private int r_off;
+        private char[,] dimensions;
+        private int positions;
+
+        public int cOff
+        {
+            get { return c_off; }
+            set { c_off = value; }
+        }
+
+        public int rOff
+        {
+            get { return r_off; }
+            set { r_off = value; }
+
+        }
+
+        public char[,] Dimensions
+        {
+            get { return dimensions; }
+            set { dimensions = value; }
+        }
+
+        public int Positions
+        {
+            get { return positions; }
+            set { positions = value; }
+        }
 
         public bool CheckSame(char[,] potential)
         {
-            if(potential.GetLength(0) != dimensions.GetLength(0) || potential.GetLength(1) != dimensions.GetLength(1))
+            if(potential.GetLength(0) != Dimensions.GetLength(0) || potential.GetLength(1) != Dimensions.GetLength(1))
             {
                 return false;
             }
             else
             {
-                for(int i = 0; i < dimensions.GetLength(0); i++)
+                for(int i = 0; i < Dimensions.GetLength(0); i++)
                 {
-                    for(int j = 0; j < dimensions.GetLength(1); j++)
+                    for(int j = 0; j < Dimensions.GetLength(1); j++)
                     {
-                        if(potential[i,j] != dimensions[i, j])
+                        if(potential[i,j] != Dimensions[i, j])
                         {
                             return false;
                         }
@@ -34,15 +59,15 @@ namespace PuzzleSolver
             }
             return true;
         }
-        public void FindPos(int sol_c, int sol_r)
+        public void FindPos(int csol, int rsol)
         {
-            c_off = sol_c - dimensions.GetLength(0) + 1;
-            r_off = sol_r - dimensions.GetLength(1) + 1;
-            positions = c_off * r_off;
+            cOff = csol - dimensions.GetLength(0) + 1;
+            rOff = rsol - dimensions.GetLength(1) + 1;
+            Positions = cOff * rOff;
         }
-        public Orientation(char[,] dimension, int c_size, int r_size)
+        public Orientation(char[,] dimension, int csize, int rsize)
         {
-            dimensions = dimension;
+            Dimensions = dimension;
         }
     }
 }
