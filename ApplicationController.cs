@@ -16,6 +16,7 @@ namespace PuzzleSolver
     {
         private static GUI ui = null;
         private static Parser parser = null;
+        private static Writer writer = null;
         private string filename = null;
         private string filepath = null;
 
@@ -32,6 +33,12 @@ namespace PuzzleSolver
         {
             get { return parser; }
             set { parser = value; }
+        }
+
+        public static Writer Writer
+        {
+            get { return writer; }
+            set { writer = value; }
         }
 
         public string Filename
@@ -62,7 +69,6 @@ namespace PuzzleSolver
 
         public void RunSearch()
         {
-
             int i = Parser.CheckSizes();
             if (i == -1)
             {
@@ -118,6 +124,8 @@ namespace PuzzleSolver
                     Console.WriteLine();
                 }
             }
+            Writer.Compose(Parser.Colorcodes);
+
             Console.ReadKey();
             Console.ReadKey();
             Console.WriteLine("Finished");
@@ -139,6 +147,7 @@ namespace PuzzleSolver
         {
             UI = new GUI();
             Parser = new Parser();
+            Writer = new Writer();
             Application.Run(UI);
         }
     }
