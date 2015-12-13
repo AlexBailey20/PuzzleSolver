@@ -88,19 +88,24 @@
             // 
             // ComponentsBox
             // 
+            this.ComponentsBox.Font = new System.Drawing.Font("Consolas", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ComponentsBox.Location = new System.Drawing.Point(12, 149);
             this.ComponentsBox.Name = "ComponentsBox";
+            this.ComponentsBox.ReadOnly = true;
             this.ComponentsBox.Size = new System.Drawing.Size(1370, 225);
             this.ComponentsBox.TabIndex = 3;
             this.ComponentsBox.Text = "";
+            this.ComponentsBox.WordWrap = false;
             // 
             // SolutionsBox
             // 
+            this.SolutionsBox.Font = new System.Drawing.Font("Consolas", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SolutionsBox.Location = new System.Drawing.Point(12, 380);
             this.SolutionsBox.Name = "SolutionsBox";
             this.SolutionsBox.Size = new System.Drawing.Size(1370, 225);
             this.SolutionsBox.TabIndex = 4;
             this.SolutionsBox.Text = "";
+            this.SolutionsBox.WordWrap = false;
             // 
             // PauseButton
             // 
