@@ -58,6 +58,8 @@ namespace PuzzleSolver
             Filename = name;
             Filepath = path;
             Parser.Update(Filename, Filepath);
+            string[] lines = Parser.ReadFile();
+            UI.populateComponents(lines);
             Log("Filename updated to: " + Filename + ". Filepath updated to: " + Filepath + ".");
             Parser.Parse();
         }
@@ -125,7 +127,7 @@ namespace PuzzleSolver
                 }
             }
             Writer.Compose(Parser.Colorcodes);
-
+            UI.populateSolutions();
             Console.ReadKey();
             Console.ReadKey();
             Console.WriteLine("Finished");

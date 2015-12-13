@@ -76,14 +76,14 @@ namespace PuzzleSolver
 
         public void WriteFile(string[] lines)
         {
-            StreamWriter writer = new StreamWriter(@"C:\\Users\\wesbonelli\\Desktop\\PuzzleSolver\\solutions.txt");
+            StreamWriter streamwriter = new StreamWriter(@"C:\\Users\\wesbonelli\\Desktop\\PuzzleSolver\\solutions.txt");
             // iterate through lines
             foreach (string line in lines)
             {
                 // write to file
-                writer.WriteLine(line);
+                streamwriter.WriteLine(line);
             }
-            writer.Close();
+            streamwriter.Close();
         }
 
         public void Compose(List<int[,]> colorcodes)

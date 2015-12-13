@@ -26,6 +26,23 @@ namespace PuzzleSolver
             InitializeComponent();
         }
 
+        public void populateComponents(string[] lines)
+        {
+            foreach (string line in lines)
+                ComponentsBox.AppendText(Environment.NewLine + line);
+            Console.Out.WriteLine(lines.Length);
+            ComponentsBox.Refresh();
+        }
+
+        public void populateSolutions()
+        {
+            StreamReader streamreader = new StreamReader("C:\\Users\\wesbonelli\\Desktop\\PuzzleSolver\\solutions.txt");
+            string line;
+            while ((line = streamreader.ReadLine()) != null)
+                SolutionsBox.AppendText(Environment.NewLine + line);
+            SolutionsBox.Refresh();
+        }
+
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
 
