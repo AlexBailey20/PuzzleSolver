@@ -26,7 +26,7 @@ namespace PuzzleSolver
             InitializeComponent();
         }
 
-        public void populateComponents(string[] lines)
+        public void PopulateComponents(string[] lines)
         {
             foreach (string line in lines)
                 ComponentsBox.AppendText(Environment.NewLine + line);
@@ -34,7 +34,7 @@ namespace PuzzleSolver
             ComponentsBox.Refresh();
         }
 
-        public void populateSolutions()
+        public void PopulateSolutions()
         {
             StreamReader streamreader = new StreamReader("C:\\Users\\wesbonelli\\Desktop\\PuzzleSolver\\solutions.txt");
             string line;
@@ -42,6 +42,11 @@ namespace PuzzleSolver
                 SolutionsBox.AppendText(Environment.NewLine + line);
             SolutionsBox.Refresh();
         }
+
+//        public void PopulateSolutions(List<int[,]> solutions)
+//        {
+//            
+//        }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
@@ -67,7 +72,7 @@ namespace PuzzleSolver
                 // update Controller's Filename and Filepath properties
                 string filename = openFileDialog.FileName;
                 string filepath = Path.GetDirectoryName(filename);
-                Controller.UpdateFile(filename, filepath);
+                Controller.Update(filename, filepath);
             }
         }
 

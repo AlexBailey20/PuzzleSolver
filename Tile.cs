@@ -81,7 +81,7 @@ namespace PuzzleSolver
             set { roff = value; }
         }
 
-        public int ColorCode
+        public int Colorcode
         {
             get { return colorcode; }
             set { colorcode = value; }
@@ -93,11 +93,28 @@ namespace PuzzleSolver
             set { solution = value; }
         }
 
+        // copy constructor
+        public Tile(Tile tile)
+        {
+            Dimensions = tile.Dimensions;
+            Orientations = tile.Orientations;
+            rSize = tile.rSize;
+            cSize = tile.cSize;
+            Size = tile.Size;
+            Positions = tile.Positions;
+            cSol = tile.cSol;
+            rSol = tile.rSol;
+            cOff = tile.cOff;
+            rOff = tile.rOff;
+            Colorcode = tile.Colorcode;
+            Solution = tile.Solution;
+        }
+
         //Constructor, takes a 2D char array and finds the number of chars which are significant (non-space)
         public Tile(char[,] input, int row, int col, int code)
         {
             Dimensions = input;
-            ColorCode = code;
+            Colorcode = code;
             Orientations = new List<Orientation>();
             rSize = row;
             cSize = col;
@@ -107,8 +124,8 @@ namespace PuzzleSolver
             Positions = 0;
             cOff = 0;
             rOff = 0;
-            char c = ' ';
             Solution = false;
+            char c = ' ';
             this.Compress();
             for(int i=0; i < cSize; i++)
             {
@@ -129,7 +146,7 @@ namespace PuzzleSolver
             {
                 if (t.Orientations[i].CheckSame(Dimensions))
                 {
-                    ColorCode = t.ColorCode;
+                    Colorcode = t.Colorcode;
                 }
             }
         }
@@ -350,7 +367,7 @@ namespace PuzzleSolver
                     if (Orientations[g].Dimensions[i, j] != ' ')
                     {                        
                         potentialsolution[i + coloffset, j + rowoffset] = Orientations[g].Dimensions[i, j];
-                        potentialcolors[i + coloffset, j + rowoffset] = ColorCode;
+                        potentialcolors[i + coloffset, j + rowoffset] = Colorcode;
                     }
                 }
             }
