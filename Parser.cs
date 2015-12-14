@@ -18,6 +18,8 @@ namespace PuzzleSolver
         private int biggest_size;
         private bool pent;
         private int code;
+        private bool reflOption;
+        private bool rotaOption;
 
         public string Filename
         {
@@ -78,6 +80,8 @@ namespace PuzzleSolver
             Filepath = "";
             rotate_solution = false;
             pent = true;
+            reflOption = true;
+            rotaOption = true;
             sol_csize = 0;
             sol_rsize = 0;
             puzzlesolutions = new List<char[,]>();
@@ -230,7 +234,7 @@ namespace PuzzleSolver
             {
                 t.cSol = solcolumns;
                 t.rSol = solrows;
-                t.FindOrientations(t.Dimensions, t.cSize, t.rSize);
+                t.FindOrientations(t.Dimensions, t.cSize, t.rSize, reflOption, rotaOption);
                 t.FindPositions();
             }
             int solsize = Pieces[Pieces.Count - 1].Size;

@@ -443,14 +443,21 @@ namespace PuzzleSolver
         }
 
         //Method to find each unique rotation and reflection for this tile
-        public void FindOrientations(char[,] initialorientation, int csize, int rsize)
+        public void FindOrientations(char[,] initialorientation, int csize, int rsize, bool reflOption, bool rotaOption)
         {
             Orientation o1 = new Orientation(initialorientation, csize, rsize);
             Orientations.Add(o1);
-            Reflect(initialorientation);
-            Rotate90(initialorientation);
-            Rotate180(initialorientation);
-            Rotate270(initialorientation);
+            if (reflOption)
+            {
+                Reflect(initialorientation);
+
+            }
+            if (rotaOption)
+            {
+                Rotate90(initialorientation, reflOption);
+                Rotate180(initialorientation, reflOption);
+                Rotate270(initialorientation, reflOption);
+            }
         }
 
         //
@@ -507,7 +514,7 @@ namespace PuzzleSolver
         }
 
         //Methods which rotate a 2D char array either 90, 180, or 270 degrees and checks its uniqueness, then calls reflect on the rotated version
-        public void Rotate90(char[,] o)
+        public void Rotate90(char[,] o, bool reflOption)
         {
             char[,] rotated = new char[o.GetLength(1), o.GetLength(0)];
             bool uni = true;
@@ -532,11 +539,17 @@ namespace PuzzleSolver
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 Orientations.Add(m);
-                Reflect(rotated);
+                if (reflOption)
+                {
+                    Reflect(rotated);
+                }
             }
             else
             {
-                Reflect(Orientations[r].Dimensions);
+                if (reflOption)
+                {
+                    Reflect(Orientations[r].Dimensions);
+                }
             }
         }
 
@@ -582,7 +595,7 @@ namespace PuzzleSolver
                 orientations.RemoveAt(4);
             }
         }
-        public void Rotate180(char[,] o)
+        public void Rotate180(char[,] o, bool reflOption)
         {
             char[,] rotated = new char[o.GetLength(0), o.GetLength(1)];
             bool uni = true;
@@ -607,16 +620,22 @@ namespace PuzzleSolver
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 Orientations.Add(m);
-                Reflect(rotated);
+                if (reflOption)
+                {
+                    Reflect(rotated);
+                }
             }
             else
             {
-                Reflect(Orientations[r].Dimensions);
+                if (reflOption)
+                {
+                    Reflect(Orientations[r].Dimensions);
+                }
             }
         }
 
         //
-        public void Rotate270(char[,] o)
+        public void Rotate270(char[,] o, bool reflOption)
         {
             char[,] rotated = new char[o.GetLength(1), o.GetLength(0)];
             bool uni = true;
@@ -641,11 +660,17 @@ namespace PuzzleSolver
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 Orientations.Add(m);
-                Reflect(rotated);
+                if (reflOption)
+                {
+                    Reflect(rotated);
+                }
             }
             else
             {
-                Reflect(Orientations[r].Dimensions);
+                if (reflOption)
+                {
+                    Reflect(Orientations[r].Dimensions);
+                }
             }
         }
 
