@@ -101,6 +101,7 @@ namespace PuzzleSolver
                     turn = t.Check180Symmetry();
                 }
             }
+            Parser.Symmetric = (rotl && refl);
             options.Reverse();
             for(int w = 0; w < options.Count; w++)
             {
@@ -122,18 +123,6 @@ namespace PuzzleSolver
             else
             {
                 Parser.SolutionBuildingRecursion(options, blanksolution, blankcolors, 0, 0);
-            }
-            for (int x = 0; x < Parser.Puzzlesolutions.Count; x++)
-            {
-                Console.WriteLine("Solution " + (x + 1));
-                for (int y = 0; y < Parser.Solution.cSize; y++)
-                {
-                    for (int z = 0; z < Parser.Solution.rSize; z++)
-                    {
-                        Console.Write(Parser.Puzzlesolutions[x][y, z]);
-                    }
-                    Console.WriteLine();
-                }
             }
             for (int q = 0; q < Parser.Colorcodes.Count; q++)
             {

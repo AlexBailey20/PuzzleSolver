@@ -13,6 +13,7 @@ namespace PuzzleSolver
         private List<char[,]> puzzlesolutions;
         private Tile solution;
         private int smallest_size;
+        private bool symmetric;
         private int sol_csize;
         private int sol_rsize;
         private int biggest_size;
@@ -26,7 +27,11 @@ namespace PuzzleSolver
             get { return filename; }
             set { filename = value; }
         }
-
+        public bool Symmetric
+        {
+            get { return symmetric;  }
+            set { symmetric = value; }
+        }
         public string Filepath
         {
             get { return filepath; }
@@ -80,6 +85,7 @@ namespace PuzzleSolver
             Filepath = "";
             rotate_solution = false;
             pent = true;
+            symmetric = false;
             reflOption = true;
             rotaOption = true;
             sol_csize = 0;
@@ -362,7 +368,7 @@ namespace PuzzleSolver
                                         }
 									    else if(puzzle_pieces.Count == 1)
                                         {
-                                            if (solution.CheckValid(running_solution) && solution.CheckNewSolution(running_colors, colorcodes))
+                                            if (solution.CheckValid(running_solution) && solution.CheckNewSolution(running_colors, colorcodes, symmetric))
                                                 {
                                                 char[,] new_solution = new char[sol_csize, sol_rsize];
                                                 int[,] new_colors = new int[sol_csize, sol_rsize];
@@ -454,7 +460,7 @@ namespace PuzzleSolver
                                     }
                                     else if (puzzle_pieces.Count == 1 || sum == Solution.Size)
                                     {
-                                        if (solution.CheckValid(running_solution) && solution.CheckNewSolution(running_colors, colorcodes))
+                                        if (solution.CheckValid(running_solution) && solution.CheckNewSolution(running_colors, colorcodes, symmetric))
                                         {
                                             char[,] new_solution = new char[sol_csize, sol_rsize];
                                             int[,] new_colors = new int[sol_csize, sol_rsize];
@@ -536,7 +542,7 @@ namespace PuzzleSolver
                             }
                             if (smallerpieces.Count == 0)
                             {
-                                if (Solution.CheckValid(runningsolution) && Solution.CheckNewSolution(runningcolors, Colorcodes))
+                                if (Solution.CheckValid(runningsolution) && Solution.CheckNewSolution(runningcolors, Colorcodes, symmetric))
                                 {
                                     char[,] newsolution = new char[csize, rsize];
                                     int[,] newcolors = new int[csize, rsize];
