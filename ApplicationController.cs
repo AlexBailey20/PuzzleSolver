@@ -111,15 +111,28 @@ namespace PuzzleSolver
                 }
             }  
             List<char[,]> foundsolutions = new List<char[,]>();
-            List<char[,]> solus = Parser.SolutionRecursion(options, foundsolutions, blanksolution, blankcolors, Parser.Solution.cSize, Parser.Solution.rSize);
-            for (int x = 0; x < solus.Count; x++)
+            /*          List<char[,]> solus = Parser.SolutionRecursion(options, foundsolutions, blanksolution, blankcolors, Parser.Solution.cSize, Parser.Solution.rSize);
+                      for (int x = 0; x < solus.Count; x++)
+                      {
+                          Console.WriteLine("Solution " + (x + 1));
+                          for (int y = 0; y < Parser.Solution.cSize; y++)
+                          {
+                              for (int z = 0; z < Parser.Solution.rSize; z++)
+                              {
+                                  Console.Write(solus[x][y, z]);
+                              }
+                              Console.WriteLine();
+                          }
+                      } */
+            Parser.SolutionBuildingRecursion(options, blanksolution, blankcolors, 0, 0);
+            for (int x = 0; x < Parser.Puzzlesolutions.Count; x++)
             {
                 Console.WriteLine("Solution " + (x + 1));
                 for (int y = 0; y < Parser.Solution.cSize; y++)
                 {
                     for (int z = 0; z < Parser.Solution.rSize; z++)
                     {
-                        Console.Write(solus[x][y, z]);
+                        Console.Write(Parser.Puzzlesolutions[x][y, z]);
                     }
                     Console.WriteLine();
                 }

@@ -255,6 +255,24 @@ namespace PuzzleSolver
             return true;
         }
 
+        public void CheckDimensionRotation()
+        {
+            if(dimensions.GetLength(0) < dimensions.GetLength(1))
+            {
+                char[,] rotated = new char[dimensions.GetLength(1), dimensions.GetLength(0)];
+                for(int i = 0; i < rotated.GetLength(0); i++)
+                {
+                    for(int j = 0; j < rotated.GetLength(1); j++)
+                    {
+                        rotated[i, j] = dimensions[dimensions.GetLength(0) - j - 1, i];
+                    }
+                }
+                dimensions = rotated;
+                cSize = rotated.GetLength(0);
+                rSize = rotated.GetLength(1);
+            }
+        }
+
         public bool CheckReflectedSymmetry()
         {
             for (int i = 0; i < dimensions.GetLength(0); i++)
@@ -526,6 +544,14 @@ namespace PuzzleSolver
             if (rotl && refl)
             {
                 Orientation o = orientations[0];
+                for(int i = 0; i < orientations.Count; i++)
+                {
+                    if(orientations[i].topLeft == 0)
+                    {
+                        o = orientations[i];
+                        break;
+                    }
+                }
                 orientations.RemoveRange(0, orientations.Count);
                 orientations.Add(o);
             }

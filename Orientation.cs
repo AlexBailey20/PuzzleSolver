@@ -11,12 +11,19 @@ namespace PuzzleSolver
         private int c_off;
         private int r_off;
         private char[,] dimensions;
+        private int top_left;
         private int positions;
 
         public int cOff
         {
             get { return c_off; }
             set { c_off = value; }
+        }
+
+        public int topLeft
+        {
+            get { return top_left; }
+            set { top_left = value; }
         }
 
         public int rOff
@@ -59,6 +66,35 @@ namespace PuzzleSolver
             }
             return true;
         }
+        public bool PlaceInSolution(char[,] running_solution, int[,] running_color, int ii, int jj, int color)
+        {
+            if ((ii + dimensions.GetLength(0) > running_solution.GetLength(0)) || (jj + dimensions.GetLength(1) - top_left > running_solution.GetLength(1)) || (jj - top_left < 0))
+            {
+                return false;
+            }
+            for (int i = 0; i < dimensions.GetLength(0); i++)
+            {
+                for (int j = 0; j < dimensions.GetLength(1); j++)
+                {
+                    if (dimensions[i, j] != ' ' && running_solution[ii + i, jj + j - top_left] != ' ')
+                    {
+                        return false;
+                    }
+                }
+            }
+            for (int n = 0; n < dimensions.GetLength(0); n++)
+            {
+                for (int m = 0; m < dimensions.GetLength(1); m++)
+                {
+                    if (dimensions[n, m] != ' ')
+                    {
+                        running_solution[ii + n, jj + m - top_left] = dimensions[n, m];
+                        running_color[ii + n, jj + m - top_left] = color;
+                    }
+                }
+            }
+            return true;
+        }
         public void FindPos(int csol, int rsol)
         {
             cOff = csol - dimensions.GetLength(0) + 1;
@@ -68,6 +104,29 @@ namespace PuzzleSolver
         public Orientation(char[,] dimension, int csize, int rsize)
         {
             Dimensions = dimension;
+            for (int j = 0; j < Dimensions.GetLength(1); j++)
+            {
+                if (Dimensions[0, j] != ' ')
+                {
+                    top_left = j;
+                    break;
+                }
+            }
+        }
+
+        internal void RemoveFromSolution(char[,] running_solution, int[,] running_colors, int ii, int jj)
+        {
+            for (int i = 0; i < dimensions.GetLength(0); i++)
+            {
+                for (int j = 0; j < dimensions.GetLength(1); j++)
+                {
+                    if (dimensions[i, j] != ' ')
+                    {
+                        running_solution[i + ii, j + jj - top_left] = ' ';
+                        running_colors[i + ii, j + jj - top_left] = -1;
+                    }
+                }
+            }
         }
     }
 }
