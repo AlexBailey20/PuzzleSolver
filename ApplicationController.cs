@@ -52,17 +52,30 @@ namespace PuzzleSolver
             Parser.Parse();
             Solver.Update(Parser.Target, Parser.Pieces);
             string[] lines = Parser.ReadFile();             // will deprecate once displays are updated
-            UI.PopulateComponents(lines);
+            UI.PopulateComponents(lines);                   // "
             Log("File at " + path + " parsed.");
         }
 
         public void RunSearch()
         {
             Log("Searching for solutions...");
-            List<int[,]> solutions = Solver.Solve();
-            Writer.Compose(solutions);
-            UI.PopulateSolutions();
-            Log("Search complete.");
+            int result = Solver.Solve();
+            List<int[,]> solutions = new List<int[,]>();
+            if (result == 0)
+            {
+                Console.WriteLine("No target possible.");
+            }
+            else if (result == 1)
+            {
+                Console.WriteLine("No target found.");
+            }
+            else if (result == 2)
+            {
+                Console.WriteLine("Target(s) found.");
+                solutions = Solver.Colorcodes;
+                Writer.Compose(solutions);          // will deprecate when displays updated
+                UI.PopulateSolutions();             // "
+            }
         }
 
         private void Log(string message)

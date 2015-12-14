@@ -10,8 +10,9 @@ namespace PuzzleSolver
     {
         private int c_off;
         private int r_off;
-        private char[,] dimensions;
+        private int topleft;
         private int positions;
+        private char[,] dimensions;
 
         public int cOff
         {
@@ -26,16 +27,35 @@ namespace PuzzleSolver
 
         }
 
-        public char[,] Dimensions
+        public int Topleft
         {
-            get { return dimensions; }
-            set { dimensions = value; }
+            get { return topleft; }
+            set { topleft = value; }
         }
 
         public int Positions
         {
             get { return positions; }
             set { positions = value; }
+        }
+
+        public char[,] Dimensions
+        {
+            get { return dimensions; }
+            set { dimensions = value; }
+        }
+
+        public Orientation(char[,] dimension, int csize, int rsize)
+        {
+            Dimensions = dimension;
+            for (int j = 0; j < Dimensions.GetLength(1); j++)
+            {
+                if (Dimensions[0, j] != ' ')
+                {
+                    Topleft = j;
+                    break;
+                }
+            }
         }
 
         public bool CheckSame(char[,] potential)
@@ -59,15 +79,57 @@ namespace PuzzleSolver
             }
             return true;
         }
+
         public void FindPos(int csol, int rsol)
         {
             cOff = csol - dimensions.GetLength(0) + 1;
             rOff = rsol - dimensions.GetLength(1) + 1;
             Positions = cOff * rOff;
         }
-        public Orientation(char[,] dimension, int csize, int rsize)
+
+        public bool PlaceInSolution(char[,] running_solution, int[,] running_color, int ii, int jj, int color)
         {
-            Dimensions = dimension;
+            if ((ii + dimensions.GetLength(0) > running_solution.GetLength(0)) || (jj + dimensions.GetLength(1) - Topleft > running_solution.GetLength(1)) || (jj - Topleft < 0))
+            {
+                return false;
+            }
+            for (int i = 0; i < dimensions.GetLength(0); i++)
+            {
+                for (int j = 0; j < dimensions.GetLength(1); j++)
+                {
+                    if (dimensions[i, j] != ' ' && running_solution[ii + i, jj + j - Topleft] != ' ')
+                    {
+                        return false;
+                    }
+                }
+            }
+            for (int n = 0; n < dimensions.GetLength(0); n++)
+            {
+                for (int m = 0; m < dimensions.GetLength(1); m++)
+                {
+                    if (dimensions[n, m] != ' ')
+                    {
+                        running_solution[ii + n, jj + m - Topleft] = dimensions[n, m];
+                        running_color[ii + n, jj + m - Topleft] = color;
+                    }
+                }
+            }
+            return true;
+        }
+
+        internal void RemoveFromSolution(char[,] running_solution, int[,] running_colors, int ii, int jj)
+        {
+            for (int i = 0; i < dimensions.GetLength(0); i++)
+            {
+                for (int j = 0; j < dimensions.GetLength(1); j++)
+                {
+                    if (dimensions[i, j] != ' ')
+                    {
+                        running_solution[i + ii, j + jj - Topleft] = ' ';
+                        running_colors[i + ii, j + jj - Topleft] = -1;
+                    }
+                }
+            }
         }
     }
 }

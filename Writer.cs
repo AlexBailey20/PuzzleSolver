@@ -96,12 +96,12 @@ namespace PuzzleSolver
             foreach (int[,] colorcode in colorcodes)
             {
                 // iterate through each row
-                for (int n = 0; n < colorcode.GetLength(0); n++)
+                for (int n = 0; n < colorcode.GetLength(1); n++)
                 {
                     // iterate through all characters
-                    for (int m = 0; m < colorcode.GetLength(1); m++)
+                    for (int m = 0; m < colorcode.GetLength(0); m++)
                     {
-                        line += colorcode[n, m];
+                        line += colorcode[m, n];
                     }
                     // form subarray for each solution
                     templines.Add(line);
