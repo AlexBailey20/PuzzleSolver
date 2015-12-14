@@ -255,7 +255,7 @@ namespace PuzzleSolver
             return true;
         }
 
-        public void CheckDimensionRotation()
+        public bool CheckDimensionRotation()
         {
             if(dimensions.GetLength(0) < dimensions.GetLength(1))
             {
@@ -270,7 +270,9 @@ namespace PuzzleSolver
                 dimensions = rotated;
                 cSize = rotated.GetLength(0);
                 rSize = rotated.GetLength(1);
+                return true;
             }
+            return false;
         }
 
         public bool CheckReflectedSymmetry()

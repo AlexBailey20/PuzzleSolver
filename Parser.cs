@@ -7,6 +7,7 @@ namespace PuzzleSolver
     {
         private string filename = null;
         private string filepath = null;
+        private bool rotate_solution;
         private List<Tile> pieces;
         private List<int[,]> colorcodes;
         private List<char[,]> puzzlesolutions;
@@ -75,6 +76,7 @@ namespace PuzzleSolver
         {
             Filename = "";
             Filepath = "";
+            rotate_solution = false;
             pent = true;
             sol_csize = 0;
             sol_rsize = 0;
@@ -218,7 +220,7 @@ namespace PuzzleSolver
         {
             Pieces[Pieces.Count - 1].Solution = true;
             Solution = Pieces[Pieces.Count - 1];
-            Solution.CheckDimensionRotation();
+            rotate_solution = Solution.CheckDimensionRotation();
             sol_csize = Solution.Dimensions.GetLength(0);
             sol_rsize = Solution.Dimensions.GetLength(1);
             Smallest = Pieces[0].Size;
@@ -246,18 +248,6 @@ namespace PuzzleSolver
                 return -1;
             }
             else {
-                /*             int diff = sum - sol_size;
-                               List<Tile> removable_tiles = new List<Tile>;
-                               if(pieces[0].size > diff){
-                                   return -1;
-                               }
-                               foreach(Tile t in pieces){
-                                   if(t.size == diff){
-                                       return 0;
-                                   }
-                                   else if(t.size < diff){
-
-                                   } */
                 return 0;
             }
         }
@@ -401,10 +391,103 @@ namespace PuzzleSolver
                 j = 0;
             }
         }
-//Recursive function to check every combination of tile placements. Starting from the biggest tile, from each position that tile can take it calls the
-//function on the next biggest tile. If at any point there is overlap, the tile is removed and the next possible branch is explored.
-//Once a possible solution is found, it is checked against the solution tile and added (if valid) to the solution list which is returned
-public List<char[,]> SolutionRecursion(List<Tile> pieces, List<char[,]> solutions, char[,] runningsolution, int[,] runningcolors, int csize, int rsize)
+        public void SolutionBuildingRecursionSubsets(List<Tile> puzzle_pieces, char[,] running_solution, int[,] running_colors, int ii, int jj, int sum)
+        {
+            int j = jj;
+            bool[,] spaces = new bool[sol_csize, sol_rsize];
+            for (int i = ii; i < sol_csize; i++)
+            {
+                while (j < sol_rsize)
+                {
+                    if (running_solution[i, j] == ' ' && solution.Dimensions[i, j] != ' ')
+                    {
+                        for (int n = 0; n < puzzle_pieces.Count; n++)
+                        {
+                            if(puzzle_pieces[n].Size + sum > Solution.Size)
+                            {
+                                continue;
+                            }
+                            for (int m = 0; m < puzzle_pieces[n].Orientations.Count; m++)
+                            {
+                                if (puzzle_pieces[n].Orientations[m].PlaceInSolution(running_solution, running_colors, i, j, puzzle_pieces[n].ColorCode))
+                                {
+                                    sum += puzzle_pieces[n].Size;
+                                    if (solution.RunningCheck(running_solution))
+                                    {
+                                        puzzle_pieces[n].Orientations[m].RemoveFromSolution(running_solution, running_colors, i, j);
+                                        sum -= puzzle_pieces[n].Size;
+                                        continue;
+                                    }
+                                    if (puzzle_pieces.Count > 1 && sum < Solution.Size)
+                                    {
+                                        for (int iii = 0; iii < sol_csize; iii++)
+                                        {
+                                            for (int jjj = 0; jjj < sol_rsize; jjj++)
+                                            {
+                                                spaces[iii, jjj] = (running_solution[iii, jjj] == ' ' && solution.Dimensions[iii, jjj] != ' ');
+                                            }
+                                        }
+                                        if (EmptySpaceCheck(spaces, sol_csize, sol_rsize))
+                                        {
+                                            puzzle_pieces[n].Orientations[m].RemoveFromSolution(running_solution, running_colors, i, j);
+                                            sum -= puzzle_pieces[n].Size;
+                                            continue;
+                                        }
+                                    }
+                                    if (puzzle_pieces.Count > 1 && sum < Solution.Size)
+                                    {
+                                        List<Tile> smaller_pieces = new List<Tile>();
+                                        for (int t = 0; t < puzzle_pieces.Count; t++)
+                                        {
+                                            if (t != n)
+                                            {
+                                                smaller_pieces.Add(puzzle_pieces[t]);
+                                            }
+                                        }
+                                        SolutionBuildingRecursionSubsets(smaller_pieces, running_solution, running_colors, i, j, sum);
+                                        puzzle_pieces[n].Orientations[m].RemoveFromSolution(running_solution, running_colors, i, j);
+                                        sum -= puzzle_pieces[n].Size;
+                                    }
+                                    else if (puzzle_pieces.Count == 1 || sum == Solution.Size)
+                                    {
+                                        if (solution.CheckValid(running_solution) && solution.CheckNewSolution(running_colors, colorcodes))
+                                        {
+                                            char[,] new_solution = new char[sol_csize, sol_rsize];
+                                            int[,] new_colors = new int[sol_csize, sol_rsize];
+                                            for (int x = 0; x < sol_csize; x++)
+                                            {
+                                                for (int y = 0; y < sol_rsize; y++)
+                                                {
+                                                    new_solution[x, y] = running_solution[x, y];
+                                                    new_colors[x, y] = running_colors[x, y];
+                                                }
+                                            }
+                                            puzzlesolutions.Add(new_solution);
+                                            colorcodes.Add(new_colors);
+                                            Console.WriteLine(puzzlesolutions.Count);
+                                            puzzle_pieces[n].Orientations[m].RemoveFromSolution(running_solution, running_colors, i, j);
+                                            return;
+                                        }
+                                        puzzle_pieces[n].Orientations[m].RemoveFromSolution(running_solution, running_colors, i, j);
+                                        sum -= puzzle_pieces[n].Size;
+                                    }
+                                }
+                            }
+                            if (n == puzzle_pieces.Count - 1)
+                            {
+                                return;
+                            }
+                        }
+                    }
+                    j++;
+                }
+                j = 0;
+            }
+        }
+        //Recursive function to check every combination of tile placements. Starting from the biggest tile, from each position that tile can take it calls the
+        //function on the next biggest tile. If at any point there is overlap, the tile is removed and the next possible branch is explored.
+        //Once a possible solution is found, it is checked against the solution tile and added (if valid) to the solution list which is returned
+        public List<char[,]> SolutionRecursion(List<Tile> pieces, List<char[,]> solutions, char[,] runningsolution, int[,] runningcolors, int csize, int rsize)
         {
             List<Tile> smallerpieces = new List<Tile>();
             for (int t = 1; t < pieces.Count; t++)
@@ -427,7 +510,6 @@ public List<char[,]> SolutionRecursion(List<Tile> pieces, List<char[,]> solution
                     {
                         if (biggest.PlaceInSolution(runningsolution, runningcolors, i, j, g))
                         {
-                            PrintSol(runningsolution);
                             if (smallerpieces.Count > 0)
                             {
                                 for (int ii = 0; ii < csize; ii++)
