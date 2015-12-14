@@ -17,8 +17,7 @@ namespace PuzzleSolver
         private static GUI ui = null;
         private static Parser parser = null;
         private static Writer writer = null;
-        private string filename = null;
-        private string filepath = null;
+        private static Solver solver = null;
 
         public delegate void EventHandler(object sender, GUIEventArgs e);
         public event EventHandler OnEvent;
@@ -41,97 +40,29 @@ namespace PuzzleSolver
             set { writer = value; }
         }
 
-        public string Filename
+        public static Solver Solver
         {
-            get { return filename; }
-            set { filename = value; }
+            get { return solver; }
+            set { solver = value; }
         }
 
-        public string Filepath
+        public void Update(string name, string path)
         {
-            get { return filepath; }
-            set { filepath = value; }
-        }
-
-        public void UpdateFile(string name, string path)
-        {
-            Filename = name;
-            Filepath = path;
-            Parser.Update(Filename, Filepath);
-            string[] lines = Parser.ReadFile();
-            UI.populateComponents(lines);
-            Log("Filename updated to: " + Filename + ". Filepath updated to: " + Filepath + ".");
+            Parser.Update(name, path);
             Parser.Parse();
-        }
-
-        public void UpdateTileDisplays()
-        {
-
+            Solver.Update(Parser.Target, Parser.Pieces);
+            string[] lines = Parser.ReadFile();             // will deprecate once displays are updated
+            UI.PopulateComponents(lines);
+            Log("File at " + path + " parsed.");
         }
 
         public void RunSearch()
         {
-            int i = Parser.CheckSizes();
-            if (i == -1)
-            {
-                Console.WriteLine("No solution possible");
-            }
-            else if (i == 0)
-            {
-                Console.WriteLine("Some pieces may not be used if a solution is found");
-            }
-            Parser.CheckDuplicateTiles();
-            List<Tile> options = new List<Tile>();
-            char[,] blanksolution = new char[Parser.Solution.cSize, Parser.Solution.rSize];
-            int[,] blankcolors = new int[Parser.Solution.cSize, Parser.Solution.rSize];
-            for (int k = 0; k < Parser.Solution.cSize; k++)
-            {
-                for (int j = 0; j < Parser.Solution.rSize; j++)
-                {
-                    blanksolution[k, j] = ' ';
-                    blankcolors[k, j] = -1;
-                }
-            }
-            foreach (Tile t in Parser.Pieces)
-            {
-                if (t.Solution == false)
-                {
-                    options.Add(t);
-                }
-            }
-            options.Reverse();
-            List<char[,]> foundsolutions = new List<char[,]>();
-            List<char[,]> solus = Parser.SolutionRecursion(options, foundsolutions, blanksolution, blankcolors, Parser.Solution.cSize, Parser.Solution.rSize);
-            for (int x = 0; x < solus.Count; x++)
-            {
-                Console.WriteLine("Solution " + (x + 1));
-                for (int y = 0; y < Parser.Solution.cSize; y++)
-                {
-                    for (int z = 0; z < Parser.Solution.rSize; z++)
-                    {
-                        Console.Write(solus[x][y, z]);
-                    }
-                    Console.WriteLine();
-                }
-            }
-            for (int q = 0; q < Parser.Colorcodes.Count; q++)
-            {
-                Console.WriteLine("Color_Codes " + (q + 1));
-                for (int s = 0; s < Parser.Solution.cSize; s++)
-                {
-                    for (int f = 0; f < Parser.Solution.rSize; f++)
-                    {
-                        Console.Write(Parser.Colorcodes[q][s, f]);
-                    }
-                    Console.WriteLine();
-                }
-            }
-            Writer.Compose(Parser.Colorcodes);
-            UI.populateSolutions();
-            Console.ReadKey();
-            Console.ReadKey();
-            Console.WriteLine("Finished");
-            Console.ReadKey();
+            Log("Searching for solutions...");
+            List<int[,]> solutions = Solver.Solve();
+            Writer.Compose(solutions);
+            UI.PopulateSolutions();
+            Log("Search complete.");
         }
 
         private void Log(string message)
@@ -150,6 +81,7 @@ namespace PuzzleSolver
             UI = new GUI();
             Parser = new Parser();
             Writer = new Writer();
+            Solver = new Solver();
             Application.Run(UI);
         }
     }
