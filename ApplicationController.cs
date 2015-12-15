@@ -21,7 +21,8 @@ namespace PuzzleSolver
         private static Writer writer = null;
         private static Solver solver = null;
         private static System.Timers.Timer timer = null;
-        private static Thread solvethread;
+        private string filename;
+        private string filepath;
 
         public delegate void EventHandler(object sender, GUIEventArgs e);
         public event EventHandler OnEvent;
@@ -56,19 +57,52 @@ namespace PuzzleSolver
             set { timer = value; }
         }
 
+        public String Filename
+        {
+            get { return filename; }
+            set { filename = value; }
+        }
+
+        public String Filepath
+        {
+            get { return filepath; }
+            set { filepath = value; }
+        }
+
         public void Update(string name, string path)
         {
+            Solver.Stop();
+            Solver.Reset();
+            if (Timer != null)
+                Timer.Close();
+            Parser.Reset();
+            Filename = name;
+            Filepath = path;
             Parser.Update(name, path);
             Parser.Parse();
+            Solver.UpdateInput(Parser.Target, Parser.Pieces);
             UI.PopulateComponents(Parser.Pieces);
-            //Log("File at " + path + " parsed.");
+            UI.UpdateNotificationBox("Input loaded from: " + name);
         }
 
         public void Run()
         {
-            //Log("Searching for solutions...");
-            if (Solver.Clean)
+            if (Solver.Running)
+                return;
+            if (Solver.Complete)
+            {
+                Solver.Stop();
+                Solver.Reset();
+                if (Timer != null)
+                    Timer.Close();
+                Parser.Reset();
+                Parser.Update(filename, filepath);
+                Parser.Parse();
                 Solver.UpdateInput(Parser.Target, Parser.Pieces);
+                Solver.RotationOption = UI.GetRotationOption();
+                Solver.ReflectionOption = UI.GetReflectionOption();
+            }
+            UI.UpdateNotificationBox("Searching for solutions...");
             Solver.Run();
             Timer = new System.Timers.Timer(2000);
             Timer.Elapsed += OnCheck;
@@ -76,38 +110,31 @@ namespace PuzzleSolver
             Timer.Enabled = true;
         }
 
-        public void Pause()
-        {
-            Solver.Pause();
-        }
-
-        public void Stop()
-        {
-            Solver.Stop();
-            Solver.Reset();
-            Solver.UpdateInput(Parser.Target, Parser.Pieces);
-        }
-
         public void GetResults()
         {
-            // replace with method that gets the one currently being checked
             int result = Solver.SolutionState;
             if (result == -1)
                 return;
             Timer.Enabled = false;
             if (result == 0)
             {
-                //Console.WriteLine("No target possible.");
+                UI.UpdateNotificationBox("No solution possible.");
             }
             else if (result == 1)
             {
-                //Console.WriteLine("No target found.");
+                UI.UpdateNotificationBox("No solutions found.");
             }
             else if (result == 2)
             {
-                //Console.WriteLine("Target(s) found.");
+                UI.UpdateNotificationBox(Solver.Colorcodes.Count + " solutions found. Populating display...");
                 UI.PopulateSolutions(Solver.Colorcodes);
+                int num = Solver.Colorcodes.Count;
+                if (num == 1)
+                    UI.UpdateNotificationBox(num + " solution found.");
+                else
+                    UI.UpdateNotificationBox(num + " solutions found.");
             }
+            UI.setOptionsEnabled();
         }
 
         private void OnCheck(Object source, System.Timers.ElapsedEventArgs e)

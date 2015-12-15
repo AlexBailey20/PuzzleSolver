@@ -93,6 +93,22 @@ namespace PuzzleSolver
             set { target = value; }
         }
 
+        public Tile()
+        {
+            Dimensions = null;
+            Orientations = null;
+            rSize = 0;
+            cSize = 0;
+            Size = 0;
+            Positions = 0;
+            cSol = 0;
+            rSol = 0;
+            cOff = 0;
+            rOff = 0;
+            Colorcode = 0;
+            Target = false;
+        }
+
         // copy constructor
         public Tile(Tile tile)
         {

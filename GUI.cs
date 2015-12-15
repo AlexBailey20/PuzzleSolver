@@ -26,6 +26,30 @@ namespace PuzzleSolver
             InitializeComponent();
         }
 
+        public bool GetRotationOption()
+        {
+            RotationCheck.Enabled = false;
+            return RotationCheck.Checked;
+        }
+
+        public bool GetReflectionOption()
+        {
+            ReflectionCheck.Enabled = false;
+            return ReflectionCheck.Checked;
+        }
+
+        public void setOptionsEnabled()
+        {
+            RotationCheck.Enabled = true;
+            ReflectionCheck.Enabled = true;
+        }
+
+        public void UpdateNotificationBox(string message)
+        {
+            NotificationBox.Clear();
+            NotificationBox.AppendText(message);
+        }
+
         public void PopulateComponents(List<Tile> components)
         {
             if (ComponentsList.Columns.Count == 0)
@@ -83,6 +107,7 @@ namespace PuzzleSolver
             SolutionsList.View = View.Details;
             SolutionsList.GridLines = true;
             SolutionsList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            List<ListViewItem> allrows = new List<ListViewItem>();
             foreach(int[,] solution in solutions)
             {
                 int rows = solution.GetLength(1);
@@ -115,10 +140,13 @@ namespace PuzzleSolver
                         }
 
                     }
-                    SolutionsList.Items.Add(row);
+                    //SolutionsList.Items.Add(row);
+                    allrows.Add(row);
                 }
-                SolutionsList.Items.Add(new ListViewItem(empty));
+                allrows.Add(new ListViewItem(empty));
             }
+            foreach (ListViewItem row in allrows)
+                SolutionsList.Items.Add(row);
             SolutionsList.Refresh();
         }
 
@@ -245,23 +273,16 @@ namespace PuzzleSolver
                 // update Controller's Filename and Filepath properties
                 string filename = openFileDialog.FileName;
                 string filepath = Path.GetDirectoryName(filename);
+                ComponentsList.Clear();
+                SolutionsList.Clear();
                 Controller.Update(filename, filepath);
             }
         }
 
         private void PlayButton_Click(object sender, EventArgs e)
         {
+            SolutionsList.Clear();
             Controller.Run();
-        }
-
-        private void PauseButton_Click(object sender, EventArgs e)
-        {
-            Controller.Pause();
-        }
-
-        private void StopButton_Click(object sender, EventArgs e)
-        {
-            Controller.Stop();
         }
 
         private void OnEvent(object sender, GUIEventArgs e)
