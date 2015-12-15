@@ -33,6 +33,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Solver.cs" />
+    <Compile Include="Writer.cs" />
     <Compile Include="GUI.cs">
       <SubType>Form</SubType>
     </Compile>

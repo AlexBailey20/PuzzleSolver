@@ -32,9 +32,14 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.PlayButton = new System.Windows.Forms.Button();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.richTextBox2 = new System.Windows.Forms.RichTextBox();
+            this.SolveButton = new System.Windows.Forms.Button();
+            this.ComponentsBox = new System.Windows.Forms.RichTextBox();
+            this.SolutionsBox = new System.Windows.Forms.RichTextBox();
+            this.PauseButton = new System.Windows.Forms.Button();
+            this.StopButton = new System.Windows.Forms.Button();
+            this.NotificationBox = new System.Windows.Forms.RichTextBox();
+            this.RotationCheck = new System.Windows.Forms.CheckBox();
+            this.ReflectionCheck = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -70,32 +75,85 @@
             this.createToolStripMenuItem.Name = "createToolStripMenuItem";
             this.createToolStripMenuItem.Size = new System.Drawing.Size(174, 38);
             // 
-            // PlayButton
+            // SolveButton
             // 
-            this.PlayButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.PlayButton.Location = new System.Drawing.Point(12, 43);
-            this.PlayButton.Name = "PlayButton";
-            this.PlayButton.Size = new System.Drawing.Size(100, 100);
-            this.PlayButton.TabIndex = 2;
-            this.PlayButton.Text = "Play";
-            this.PlayButton.UseVisualStyleBackColor = true;
-            this.PlayButton.Click += new System.EventHandler(this.PlayButton_Click);
+            this.SolveButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.SolveButton.Location = new System.Drawing.Point(12, 43);
+            this.SolveButton.Name = "SolveButton";
+            this.SolveButton.Size = new System.Drawing.Size(100, 100);
+            this.SolveButton.TabIndex = 2;
+            this.SolveButton.Text = "Solve";
+            this.SolveButton.UseVisualStyleBackColor = true;
+            this.SolveButton.Click += new System.EventHandler(this.PlayButton_Click);
             // 
-            // richTextBox1
+            // ComponentsBox
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(12, 149);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(1370, 250);
-            this.richTextBox1.TabIndex = 3;
-            this.richTextBox1.Text = "";
+            this.ComponentsBox.Font = new System.Drawing.Font("Consolas", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ComponentsBox.Location = new System.Drawing.Point(12, 149);
+            this.ComponentsBox.Name = "ComponentsBox";
+            this.ComponentsBox.ReadOnly = true;
+            this.ComponentsBox.Size = new System.Drawing.Size(1370, 225);
+            this.ComponentsBox.TabIndex = 3;
+            this.ComponentsBox.Text = "";
+            this.ComponentsBox.WordWrap = false;
             // 
-            // richTextBox2
+            // SolutionsBox
             // 
-            this.richTextBox2.Location = new System.Drawing.Point(12, 410);
-            this.richTextBox2.Name = "richTextBox2";
-            this.richTextBox2.Size = new System.Drawing.Size(1370, 250);
-            this.richTextBox2.TabIndex = 4;
-            this.richTextBox2.Text = "";
+            this.SolutionsBox.Font = new System.Drawing.Font("Consolas", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SolutionsBox.Location = new System.Drawing.Point(12, 380);
+            this.SolutionsBox.Name = "SolutionsBox";
+            this.SolutionsBox.Size = new System.Drawing.Size(1370, 225);
+            this.SolutionsBox.TabIndex = 4;
+            this.SolutionsBox.Text = "";
+            this.SolutionsBox.WordWrap = false;
+            // 
+            // PauseButton
+            // 
+            this.PauseButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.PauseButton.Location = new System.Drawing.Point(118, 43);
+            this.PauseButton.Name = "PauseButton";
+            this.PauseButton.Size = new System.Drawing.Size(100, 100);
+            this.PauseButton.TabIndex = 5;
+            this.PauseButton.Text = "Pause";
+            this.PauseButton.UseVisualStyleBackColor = true;
+            // 
+            // StopButton
+            // 
+            this.StopButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.StopButton.Location = new System.Drawing.Point(224, 43);
+            this.StopButton.Name = "StopButton";
+            this.StopButton.Size = new System.Drawing.Size(100, 100);
+            this.StopButton.TabIndex = 6;
+            this.StopButton.Text = "Stop";
+            this.StopButton.UseVisualStyleBackColor = true;
+            // 
+            // NotificationBox
+            // 
+            this.NotificationBox.Location = new System.Drawing.Point(13, 612);
+            this.NotificationBox.Name = "NotificationBox";
+            this.NotificationBox.Size = new System.Drawing.Size(1369, 49);
+            this.NotificationBox.TabIndex = 7;
+            this.NotificationBox.Text = "";
+            // 
+            // RotationCheck
+            // 
+            this.RotationCheck.AutoSize = true;
+            this.RotationCheck.Location = new System.Drawing.Point(363, 80);
+            this.RotationCheck.Name = "RotationCheck";
+            this.RotationCheck.Size = new System.Drawing.Size(210, 29);
+            this.RotationCheck.TabIndex = 8;
+            this.RotationCheck.Text = "Include Rotations";
+            this.RotationCheck.UseVisualStyleBackColor = true;
+            // 
+            // ReflectionCheck
+            // 
+            this.ReflectionCheck.AutoSize = true;
+            this.ReflectionCheck.Location = new System.Drawing.Point(596, 80);
+            this.ReflectionCheck.Name = "ReflectionCheck";
+            this.ReflectionCheck.Size = new System.Drawing.Size(226, 29);
+            this.ReflectionCheck.TabIndex = 9;
+            this.ReflectionCheck.Text = "Include Reflections";
+            this.ReflectionCheck.UseVisualStyleBackColor = true;
             // 
             // GUI
             // 
@@ -104,9 +162,14 @@
             this.AutoScroll = true;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1394, 672);
-            this.Controls.Add(this.richTextBox2);
-            this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.PlayButton);
+            this.Controls.Add(this.ReflectionCheck);
+            this.Controls.Add(this.RotationCheck);
+            this.Controls.Add(this.NotificationBox);
+            this.Controls.Add(this.StopButton);
+            this.Controls.Add(this.PauseButton);
+            this.Controls.Add(this.SolutionsBox);
+            this.Controls.Add(this.ComponentsBox);
+            this.Controls.Add(this.SolveButton);
             this.Controls.Add(this.menuStrip1);
             this.DoubleBuffered = true;
             this.MainMenuStrip = this.menuStrip1;
@@ -126,10 +189,15 @@
 
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
-        private System.Windows.Forms.Button PlayButton;
+        private System.Windows.Forms.Button SolveButton;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createToolStripMenuItem;
-        private System.Windows.Forms.RichTextBox richTextBox2;
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.RichTextBox SolutionsBox;
+        private System.Windows.Forms.RichTextBox ComponentsBox;
+        private System.Windows.Forms.Button PauseButton;
+        private System.Windows.Forms.Button StopButton;
+        private System.Windows.Forms.RichTextBox NotificationBox;
+        private System.Windows.Forms.CheckBox RotationCheck;
+        private System.Windows.Forms.CheckBox ReflectionCheck;
     }
 }

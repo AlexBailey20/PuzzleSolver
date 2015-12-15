@@ -434,7 +434,7 @@ namespace PuzzleSolver
             {
                 for (int j = 0; j < possolution.GetLength(1); j++)
                 {
-                    if (possolution[i, j] != ' ' && possolution[i, j] != Dimensions[i, j])
+                    if(possolution[i,j] != ' ' && possolution[i,j] != Dimensions[i, j])
                         return true;
                 }
             }
@@ -447,7 +447,8 @@ namespace PuzzleSolver
             char[,] reflected = new char[initialorientation.GetLength(0), initialorientation.GetLength(1)];
             for (int i = 0; i < initialorientation.GetLength(0); i++)
             {
-                for (int j = 0; j < initialorientation.GetLength(1); j++)
+                for(int j = 0; j < initialorientation.GetLength(1); j++)
+
                     reflected[i, j] = initialorientation[initialorientation.GetLength(0) - i - 1, j];
             }
             bool uni = true;
