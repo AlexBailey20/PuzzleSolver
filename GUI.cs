@@ -36,7 +36,7 @@ namespace PuzzleSolver
 
         public void PopulateSolutions()
         {
-            StreamReader streamreader = new StreamReader("C:\\Users\\wesbonelli\\Desktop\\PuzzleSolver\\solutions.txt");
+            StreamReader streamreader = new StreamReader("C:\\Users\\Xeny\\solutions.txt");
             string line;
             while ((line = streamreader.ReadLine()) != null)
                 SolutionsBox.AppendText(Environment.NewLine + line);

@@ -14,6 +14,7 @@ namespace PuzzleSolver
         private int solrsize;
         private bool pent;
         private bool rotate;
+        private bool symmetric;
         private Tile target;
         private List<Tile> pieces;
         private List<int[,]> colorcodes;
@@ -23,7 +24,11 @@ namespace PuzzleSolver
             get { return smallest; }
             set { smallest = value; }
         }
-
+        public bool Symmetric
+        {
+            get { return symmetric; }
+            set { symmetric = value; }
+        }
         public int Biggest
         {
             get { return biggest; }
@@ -78,6 +83,7 @@ namespace PuzzleSolver
             Biggest = 0;
             solCSize = 0;
             solRSize = 0;
+            symmetric = false;
             Rotate = false;
             Pent = true;
             Pieces = new List<Tile>();
@@ -214,7 +220,7 @@ namespace PuzzleSolver
                             }
                             if (smallerpieces.Count == 0)
                             {
-                                if (Target.CheckValid(runningsolution) && Target.CheckNewSolution(runningcolors, Colorcodes))
+                                if (Target.CheckValid(runningsolution) && Target.CheckNewSolution(runningcolors, Colorcodes, Symmetric))
                                 {
                                     char[,] newsolution = new char[csize, rsize];
                                     int[,] newcolors = new int[csize, rsize];
@@ -317,7 +323,7 @@ namespace PuzzleSolver
                                     }
                                     else if (puzzle_pieces.Count == 1)
                                     {
-                                        if (Target.CheckValid(running_solution) && Target.CheckNewSolution(running_colors, Colorcodes))
+                                        if (Target.CheckValid(running_solution) && Target.CheckNewSolution(running_colors, Colorcodes, Symmetric))
                                         {
                                             int[,] new_colors = new int[solCSize, solRSize];
                                             for (int x = 0; x < solCSize; x++)
@@ -408,7 +414,7 @@ namespace PuzzleSolver
                                     }
                                     else if (puzzle_pieces.Count == 1 || sum == Target.Size)
                                     {
-                                        if (Target.CheckValid(running_solution) && Target.CheckNewSolution(running_colors, colorcodes))
+                                        if (Target.CheckValid(running_solution) && Target.CheckNewSolution(running_colors, colorcodes, Symmetric))
                                         {
                                             char[,] new_solution = new char[solCSize, solRSize];
                                             int[,] new_colors = new int[solCSize, solRSize];
@@ -477,6 +483,7 @@ namespace PuzzleSolver
                     Pent = Pent && (t.Size == 5);
                 }
             }
+            Symmetric = rotl && refl;
             options.Reverse();
             for (int w = 0; w < options.Count; w++)
             {

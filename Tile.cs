@@ -178,10 +178,10 @@ namespace PuzzleSolver
             return true;
         }
 
-        public bool CheckNewSolution(int[,] runningcolors, List<int[,]> colorsolutions)
+        public bool CheckNewSolution(int[,] runningcolors, List<int[,]> colorsolutions, bool symmetric)
         {
             bool repeatedsolution = true;
-            for (int i = 0; i < colorsolutions.Count; i++)
+            for (int i = colorsolutions.Count - 1; i >= 0; i--)
             {
                 repeatedsolution = true;
                 for (int j = 0; j < runningcolors.GetLength(0); j++)
@@ -200,6 +200,8 @@ namespace PuzzleSolver
                 if (repeatedsolution)
                     return false;
             }
+            if (symmetric)
+                return true;
             return CheckAgainstSolutionRotations(runningcolors, colorsolutions);
         }
 
