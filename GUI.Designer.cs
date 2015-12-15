@@ -33,13 +33,13 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SolveButton = new System.Windows.Forms.Button();
-            this.ComponentsBox = new System.Windows.Forms.RichTextBox();
-            this.SolutionsBox = new System.Windows.Forms.RichTextBox();
             this.PauseButton = new System.Windows.Forms.Button();
             this.StopButton = new System.Windows.Forms.Button();
             this.NotificationBox = new System.Windows.Forms.RichTextBox();
             this.RotationCheck = new System.Windows.Forms.CheckBox();
             this.ReflectionCheck = new System.Windows.Forms.CheckBox();
+            this.ComponentsList = new System.Windows.Forms.ListView();
+            this.SolutionsList = new System.Windows.Forms.ListView();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -85,27 +85,6 @@
             this.SolveButton.Text = "Solve";
             this.SolveButton.UseVisualStyleBackColor = true;
             this.SolveButton.Click += new System.EventHandler(this.PlayButton_Click);
-            // 
-            // ComponentsBox
-            // 
-            this.ComponentsBox.Font = new System.Drawing.Font("Consolas", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ComponentsBox.Location = new System.Drawing.Point(12, 149);
-            this.ComponentsBox.Name = "ComponentsBox";
-            this.ComponentsBox.ReadOnly = true;
-            this.ComponentsBox.Size = new System.Drawing.Size(1370, 225);
-            this.ComponentsBox.TabIndex = 3;
-            this.ComponentsBox.Text = "";
-            this.ComponentsBox.WordWrap = false;
-            // 
-            // SolutionsBox
-            // 
-            this.SolutionsBox.Font = new System.Drawing.Font("Consolas", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SolutionsBox.Location = new System.Drawing.Point(12, 380);
-            this.SolutionsBox.Name = "SolutionsBox";
-            this.SolutionsBox.Size = new System.Drawing.Size(1370, 225);
-            this.SolutionsBox.TabIndex = 4;
-            this.SolutionsBox.Text = "";
-            this.SolutionsBox.WordWrap = false;
             // 
             // PauseButton
             // 
@@ -155,6 +134,22 @@
             this.ReflectionCheck.Text = "Include Reflections";
             this.ReflectionCheck.UseVisualStyleBackColor = true;
             // 
+            // listView1
+            // 
+            this.ComponentsList.Location = new System.Drawing.Point(12, 149);
+            this.ComponentsList.Name = "ComponentsList";
+            this.ComponentsList.Size = new System.Drawing.Size(1370, 225);
+            this.ComponentsList.TabIndex = 10;
+            this.ComponentsList.UseCompatibleStateImageBehavior = false;
+            // 
+            // listView2
+            // 
+            this.SolutionsList.Location = new System.Drawing.Point(12, 380);
+            this.SolutionsList.Name = "SolutionsList";
+            this.SolutionsList.Size = new System.Drawing.Size(1370, 225);
+            this.SolutionsList.TabIndex = 11;
+            this.SolutionsList.UseCompatibleStateImageBehavior = false;
+            // 
             // GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -162,13 +157,13 @@
             this.AutoScroll = true;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1394, 672);
+            this.Controls.Add(this.SolutionsList);
+            this.Controls.Add(this.ComponentsList);
             this.Controls.Add(this.ReflectionCheck);
             this.Controls.Add(this.RotationCheck);
             this.Controls.Add(this.NotificationBox);
             this.Controls.Add(this.StopButton);
             this.Controls.Add(this.PauseButton);
-            this.Controls.Add(this.SolutionsBox);
-            this.Controls.Add(this.ComponentsBox);
             this.Controls.Add(this.SolveButton);
             this.Controls.Add(this.menuStrip1);
             this.DoubleBuffered = true;
@@ -192,12 +187,12 @@
         private System.Windows.Forms.Button SolveButton;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createToolStripMenuItem;
-        private System.Windows.Forms.RichTextBox SolutionsBox;
-        private System.Windows.Forms.RichTextBox ComponentsBox;
         private System.Windows.Forms.Button PauseButton;
         private System.Windows.Forms.Button StopButton;
         private System.Windows.Forms.RichTextBox NotificationBox;
         private System.Windows.Forms.CheckBox RotationCheck;
         private System.Windows.Forms.CheckBox ReflectionCheck;
+        private System.Windows.Forms.ListView ComponentsList;
+        private System.Windows.Forms.ListView SolutionsList;
     }
 }

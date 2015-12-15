@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PuzzleSolver
@@ -12,11 +13,20 @@ namespace PuzzleSolver
         private int biggest;
         private int solcsize;
         private int solrsize;
+        private int algorithm;
+        private int solutionstate;                  // ApplicationController checks this at intervals while Solver runs
         private bool pent;
         private bool rotate;
+        private bool reflectionoption;
+        private bool rotationoption;
+        private bool clean;
         private Tile target;
         private List<Tile> pieces;
         private List<int[,]> colorcodes;
+        List<Tile> options;
+        char[,] blanksolution;
+        int[,] blankcolors;
+        private static Thread solvethread;
 
         public int Smallest
         {
@@ -42,10 +52,40 @@ namespace PuzzleSolver
             set { solrsize = value; }
         }
 
+        public int Algorithm
+        {
+            get { return algorithm; }
+            set { algorithm = value; }
+        }
+
+        public int SolutionState
+        {
+            get { return solutionstate; }
+            set { solutionstate = value; }
+        }
+
         public bool Pent
         {
             get { return pent; }
             set { pent = value; }
+        }
+
+        public bool Clean
+        {
+            get { return clean; }
+            set { clean = value; }
+        }
+
+        public bool ReflectionOption
+        {
+            get { return reflectionoption; }
+            set { reflectionoption = value; }
+        }
+
+        public bool RotationOption
+        {
+            get { return rotationoption; }
+            set { rotationoption = value; }
         }
 
         public bool Rotate
@@ -72,28 +112,177 @@ namespace PuzzleSolver
             set { colorcodes = value; }
         }
 
+        public List<Tile> Options
+        {
+            get { return options; }
+            set { options = value; }
+        }
+
+        public char[,] Blanksolution
+        {
+            get { return blanksolution; }
+            set { blanksolution = value; }
+        }
+
+        public int[,] Blankcolors
+        {
+            get { return blankcolors; }
+            set { blankcolors = value; }
+        }
+
+        public static Thread Solvethread
+        {
+            get { return solvethread; }
+            set { solvethread = value; }
+        }
+
         public Solver()
         {
             Smallest = 0;
             Biggest = 0;
             solCSize = 0;
             solRSize = 0;
+            SolutionState = -1;
             Rotate = false;
             Pent = true;
+            ReflectionOption = true;
+            RotationOption = true;
+            Clean = true;
             Pieces = new List<Tile>();
             Colorcodes = new List<int[,]>();
+            Solvethread = new Thread(new ThreadStart(Run));
         }
 
-        public void Update(Tile targettile, List<Tile> tilepieces)
+        public void UpdateInput(Tile targettile, List<Tile> tilepieces)
         {
             if (Target == null)
                 Target = new Tile(targettile);
             else
                 Target = targettile;
             Pieces = tilepieces;
-            // 
             Pieces[Pieces.Count - 1].Target = true;
             Target = Pieces[Pieces.Count - 1];
+        }
+
+        public void Reset()
+        {
+            Smallest = 0;
+            Biggest = 0;
+            solCSize = 0;
+            solRSize = 0;
+            SolutionState = -1;
+            Rotate = false;
+            Pent = true;
+            Pieces.Clear();
+            Colorcodes.Clear();
+            Solvethread = new Thread(new ThreadStart(Run));
+        }
+
+        public void Run()
+        {
+            //Console.Out.WriteLine(Solvethread.ThreadState.ToString());
+            if (Solvethread.ThreadState == ThreadState.Suspended)
+                Solvethread.Resume();
+            if (Solvethread.ThreadState == ThreadState.Running || Solvethread.ThreadState == ThreadState.SuspendRequested)
+                return;
+            else
+            {
+                int i = CheckSizes();
+                if (i == -1)
+                {
+                    SolutionState = 0;
+                    return;               // case 0: no solution possible
+                }
+                if (i == 0)
+                    //Console.WriteLine("Some pieces may not be used if a target is found.");
+                    CheckDuplicateTiles();
+                Options = new List<Tile>();
+                Blanksolution = new char[Target.cSize, Target.rSize];
+                Blankcolors = new int[Target.cSize, Target.rSize];
+                bool rotl = false;
+                bool refl = false;
+                bool turn = false;
+                // create blank solution map
+                for (int k = 0; k < Target.cSize; k++)
+                {
+                    for (int j = 0; j < Target.rSize; j++)
+                    {
+                        Blanksolution[k, j] = ' ';
+                        Blankcolors[k, j] = -1;
+                    }
+                }
+                // check pentomino and tile symemetry
+                foreach (Tile t in Pieces)
+                {
+                    if (t.Target)
+                    {
+                        rotl = t.CheckRotationalSymmetry();
+                        refl = t.CheckReflectedSymmetry();
+                        turn = t.Check180Symmetry();
+                    }
+                    else
+                    {
+                        options.Add(t);
+                        Pent = Pent && (t.Size == 5);
+                    }
+                }
+                Options.Reverse();
+                for (int w = 0; w < Options.Count; w++)
+                {
+                    if (Options[w].Orientations.Count == 8)
+                    {
+                        Options[w].Fix(rotl, refl, turn);
+                        break;
+                    }
+                }
+                if (Options[0].Size > Target.Size / 2)
+                    Algorithm = 0;
+                else if (i == 0)
+                    Algorithm = 1;
+                else
+                    Algorithm = 2;
+                Solvethread = new Thread(new ThreadStart(Solve));
+                Solvethread.Start();
+            }
+        }
+
+        public void Pause()
+        {
+            if (Solvethread.ThreadState == ThreadState.Running)
+                Solvethread.Suspend();
+            else
+                return;
+        }
+
+        public void Stop()
+        {
+            if (Solvethread.ThreadState == ThreadState.Running)
+            {
+                GetSolutions();
+                Solvethread.Abort();
+                return;
+            }
+        }
+
+        public void Solve()
+        {
+            if (Algorithm == 0)
+                SolutionRecursion(Options, Colorcodes, Blanksolution, Blankcolors, Target.cSize, Target.rSize);
+            if (Algorithm == 1)
+                SolutionBuildingRecursionSubsets(Options, Blanksolution, Blankcolors, 0, 0, 0);
+            if (Algorithm == 2)
+                SolutionBuildingRecursion(Options, Blanksolution, Blankcolors, 0, 0);
+            Stop();
+        }
+
+        public void GetSolutions()
+        {
+            if (Colorcodes.Count == 0)
+            {
+                SolutionState = 1;
+                return;               // case 1: no solution found   
+            }
+            SolutionState = 2;
         }
 
         //Check all the sizes of tiles to see if solution tile is the same size or smaller than sum of other tiles
@@ -110,7 +299,7 @@ namespace PuzzleSolver
             {
                 t.cSol = solcolumns;
                 t.rSol = solrows;
-                t.FindOrientations(t.Dimensions, t.cSize, t.rSize);
+                t.FindOrientations(t.Dimensions, t.cSize, t.rSize, ReflectionOption, RotationOption);
                 t.FindPositions();
             }
             int solsize = Pieces[Pieces.Count - 1].Size;
@@ -175,70 +364,76 @@ namespace PuzzleSolver
         //Once a possible solution is found, it is checked against the solution tile and added (if valid) to the solution list which is returned
         public void SolutionRecursion(List<Tile> pieces, List<int[,]> codes, char[,] runningsolution, int[,] runningcolors, int csize, int rsize)
         {
-            List<Tile> smallerpieces = new List<Tile>();
-            for (int t = 1; t < pieces.Count; t++)
-                smallerpieces.Add(pieces[t]);
-            Tile biggest = pieces[0];
-            Biggest = biggest.Size;
-            if (pieces.Count > 1)
-                Biggest = pieces[1].Size;
-            bool found = false;
-            bool[,] spaces = new bool[csize, rsize];
-            for (int g = 0; g < biggest.Orientations.Count; g++)
-            {
-                for (int i = 0; i < biggest.Orientations[g].cOff; i++)
+                List<Tile> smallerpieces = new List<Tile>();
+                for (int t = 1; t < pieces.Count; t++)
+                    smallerpieces.Add(pieces[t]);
+                Tile biggest = pieces[0];
+                Biggest = biggest.Size;
+                if (pieces.Count > 1)
+                    Biggest = pieces[1].Size;
+                bool found = false;
+                bool[,] spaces = new bool[csize, rsize];
+                for (int g = 0; g < biggest.Orientations.Count; g++)
                 {
-                    for (int j = 0; j < biggest.Orientations[g].rOff; j++)
+                    for (int i = 0; i < biggest.Orientations[g].cOff; i++)
                     {
-                        if (biggest.PlaceInSolution(runningsolution, runningcolors, i, j, g))
+                        for (int j = 0; j < biggest.Orientations[g].rOff; j++)
                         {
-                            if (smallerpieces.Count > 0)
+                            if (biggest.PlaceInSolution(runningsolution, runningcolors, i, j, g))
                             {
-                                for (int ii = 0; ii < csize; ii++)
+                                if (smallerpieces.Count > 0)
                                 {
-                                    for (int jj = 0; jj < rsize; jj++)
+                                    for (int ii = 0; ii < csize; ii++)
                                     {
-                                        spaces[ii, jj] = (runningsolution[ii, jj] == ' ' && Target.Dimensions[ii, jj] != ' ');
+                                        for (int jj = 0; jj < rsize; jj++)
+                                        {
+                                            spaces[ii, jj] = (runningsolution[ii, jj] == ' ' && Target.Dimensions[ii, jj] != ' ');
+                                        }
+                                    }
+                                    if (EmptySpaceCheck(spaces, csize, rsize))
+                                    {
+                                        biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
+                                        continue;
                                     }
                                 }
-                                if (EmptySpaceCheck(spaces, csize, rsize))
+                                if (Target.RunningCheck(runningsolution))
                                 {
                                     biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
                                     continue;
                                 }
-                            }
-                            if (Target.RunningCheck(runningsolution))
-                            {
-                                biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
-                                continue;
-                            }
-                            if (smallerpieces.Count == 0)
-                            {
-                                if (Target.CheckValid(runningsolution) && Target.CheckNewSolution(runningcolors, Colorcodes))
+                                if (smallerpieces.Count == 0)
                                 {
-                                    char[,] newsolution = new char[csize, rsize];
-                                    int[,] newcolors = new int[csize, rsize];
-                                    for (int n = 0; n < csize; n++)
+                                    if (Target.CheckValid(runningsolution) && Target.CheckNewSolution(runningcolors, Colorcodes))
                                     {
-                                        for (int m = 0; m < rsize; m++)
+                                        char[,] newsolution = new char[csize, rsize];
+                                        int[,] newcolors = new int[csize, rsize];
+                                        for (int n = 0; n < csize; n++)
                                         {
-                                            newsolution[n, m] = runningsolution[n, m];
-                                            newcolors[n, m] = runningcolors[n, m];
+                                            for (int m = 0; m < rsize; m++)
+                                            {
+                                                newsolution[n, m] = runningsolution[n, m];
+                                                newcolors[n, m] = runningcolors[n, m];
+                                            }
                                         }
+                                        Colorcodes.Add(newcolors);
+                                        found = true;
                                     }
-                                    Colorcodes.Add(newcolors);
-                                    Console.WriteLine(Colorcodes.Count);
-                                    found = true;
+                                    biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
+                                    if (found)
+                                    {
+                                        break;
+                                    }
                                 }
-                                biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
-                                if (found)
+                                else
                                 {
-                                    break;
+                                    SolutionRecursion(smallerpieces, Colorcodes, runningsolution, runningcolors, csize, rsize);
+                                    biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
                                 }
                             }
-                            else {
-                                SolutionRecursion(smallerpieces, Colorcodes, runningsolution, runningcolors, csize, rsize);
-                                biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
+                            if (found)
+                            {
+                                found = false;
+                                break;
                             }
                         }
                         if (found)
@@ -247,13 +442,7 @@ namespace PuzzleSolver
                             break;
                         }
                     }
-                    if (found)
-                    {
-                        found = false;
-                        break;
-                    }
                 }
-            }
         }
 
         public void SolutionBuildingRecursion(List<Tile> puzzle_pieces, char[,] running_solution, int[,] running_colors, int ii, int jj)
@@ -327,9 +516,7 @@ namespace PuzzleSolver
                                                     new_colors[x, y] = running_colors[x, y];
                                                 }
                                             }
-                                            Console.Out.WriteLine(new_colors.Length);
                                             Colorcodes.Add(new_colors);
-                                            Console.WriteLine(Colorcodes.Count);
                                             puzzle_pieces[n].Orientations[m].RemoveFromSolution(running_solution, running_colors, i, j);
                                             return;
                                         }
@@ -439,69 +626,6 @@ namespace PuzzleSolver
                 }
                 j = 0;
             }
-        }
-
-        public int Solve()
-        {
-            int i = CheckSizes();
-            if (i == -1)
-                return 0;               // case 1: no solution possible
-            else if (i == 0)
-                Console.WriteLine("Some pieces may not be used if a target is found");
-            CheckDuplicateTiles();
-            List<Tile> options = new List<Tile>();
-            char[,] blanksolution = new char[Target.cSize, Target.rSize];
-            int[,] blankcolors = new int[Target.cSize, Target.rSize];
-            bool rotl = false;
-            bool refl = false;
-            bool turn = false;
-            for (int k = 0; k < Target.cSize; k++)
-            {
-                for (int j = 0; j < Target.rSize; j++)
-                {
-                    blanksolution[k, j] = ' ';
-                    blankcolors[k, j] = -1;
-                }
-            }
-            foreach (Tile t in Pieces)
-            {
-                if (t.Target)
-                {
-                    rotl = t.CheckRotationalSymmetry();
-                    refl = t.CheckReflectedSymmetry();
-                    turn = t.Check180Symmetry();
-                }
-                else
-                {
-                    options.Add(t);
-                    Pent = Pent && (t.Size == 5);
-                }
-            }
-            options.Reverse();
-            for (int w = 0; w < options.Count; w++)
-            {
-                if (options[w].Orientations.Count == 8)
-                {
-                    options[w].Fix(rotl, refl, turn);
-                    break;
-                }
-            }
-            if (options[0].Size > Target.Size / 2)
-            {
-            SolutionRecursion(options, Colorcodes, blanksolution, blankcolors, Target.cSize, Target.rSize);
-            }
-            else if (i == 0)
-            {
-                SolutionBuildingRecursionSubsets(options, blanksolution, blankcolors, 0, 0, 0);
-            }
-            else
-            {
-                SolutionBuildingRecursion(options, blanksolution, blankcolors, 0, 0);
-            }
-            
-            if (Colorcodes.Count == 0)
-                return 1;               // case 1: no solution found              
-            return 2;                   // case 2: solution(s) found
         }
     }
 }

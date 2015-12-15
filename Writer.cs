@@ -110,6 +110,7 @@ namespace PuzzleSolver
                 // add each subarray to array holding all solutions
                 foreach (string templine in templines)
                     alllines.Add(templine);
+                alllines.Add("");
                 // clear templines for next pass
                 templines.Clear();
                 // advance counter

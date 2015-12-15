@@ -160,6 +160,7 @@ namespace PuzzleSolver
             }
             Pieces.Sort();
             Target = Pieces[Pieces.Count - 1];
+            Pieces[Pieces.Count - 1].Target = true;
             return Pieces;
         }
     }
