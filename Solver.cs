@@ -27,6 +27,8 @@ namespace PuzzleSolver
         char[,] blanksolution;
         int[,] blankcolors;
         private static Thread solvethread;
+        private bool running;
+        private bool complete;
 
         public int Smallest
         {
@@ -136,6 +138,18 @@ namespace PuzzleSolver
             set { solvethread = value; }
         }
 
+        public bool Running
+        {
+            get { return running; }
+            set { running = value; }
+        }
+
+        public bool Complete
+        {
+            get { return complete; }
+            set { complete = value; }
+        }
+
         public Solver()
         {
             Smallest = 0;
@@ -145,23 +159,20 @@ namespace PuzzleSolver
             SolutionState = -1;
             Rotate = false;
             Pent = true;
-            ReflectionOption = true;
-            RotationOption = true;
-            Clean = true;
+            ReflectionOption = false;
+            RotationOption = false;
+            Target = new Tile();
             Pieces = new List<Tile>();
             Colorcodes = new List<int[,]>();
             Solvethread = new Thread(new ThreadStart(Run));
+            Running = false;
+            Complete = false;
         }
 
         public void UpdateInput(Tile targettile, List<Tile> tilepieces)
         {
-            if (Target == null)
-                Target = new Tile(targettile);
-            else
-                Target = targettile;
+            Target = targettile;
             Pieces = tilepieces;
-            Pieces[Pieces.Count - 1].Target = true;
-            Target = Pieces[Pieces.Count - 1];
         }
 
         public void Reset()
@@ -173,17 +184,19 @@ namespace PuzzleSolver
             SolutionState = -1;
             Rotate = false;
             Pent = true;
+            ReflectionOption = false;
+            RotationOption = false;
             Pieces.Clear();
             Colorcodes.Clear();
             Solvethread = new Thread(new ThreadStart(Run));
+            Running = false;
+            Complete = false;
         }
 
         public void Run()
         {
             //Console.Out.WriteLine(Solvethread.ThreadState.ToString());
-            if (Solvethread.ThreadState == ThreadState.Suspended)
-                Solvethread.Resume();
-            if (Solvethread.ThreadState == ThreadState.Running || Solvethread.ThreadState == ThreadState.SuspendRequested)
+            if (Running)
                 return;
             else
             {
@@ -242,26 +255,17 @@ namespace PuzzleSolver
                 else
                     Algorithm = 2;
                 Solvethread = new Thread(new ThreadStart(Solve));
+                Running = true;
                 Solvethread.Start();
             }
         }
 
-        public void Pause()
-        {
-            if (Solvethread.ThreadState == ThreadState.Running)
-                Solvethread.Suspend();
-            else
-                return;
-        }
-
         public void Stop()
         {
-            if (Solvethread.ThreadState == ThreadState.Running)
-            {
-                GetSolutions();
-                Solvethread.Abort();
-                return;
-            }
+            Running = false;
+            Complete = true;
+            Solvethread.Abort();
+            return;
         }
 
         public void Solve()
@@ -272,6 +276,7 @@ namespace PuzzleSolver
                 SolutionBuildingRecursionSubsets(Options, Blanksolution, Blankcolors, 0, 0, 0);
             if (Algorithm == 2)
                 SolutionBuildingRecursion(Options, Blanksolution, Blankcolors, 0, 0);
+            GetSolutions();
             Stop();
         }
 
@@ -292,6 +297,7 @@ namespace PuzzleSolver
             Rotate = Target.CheckDimensionRotation();
             solCSize = Target.Dimensions.GetLength(0);
             solRSize = Target.Dimensions.GetLength(1);
+            //Console.Out.WriteLine(Pieces[0].Size);
             Smallest = Pieces[0].Size;
             int solcolumns = Pieces[Pieces.Count - 1].cSize;
             int solrows = Pieces[Pieces.Count - 1].rSize;

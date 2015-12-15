@@ -47,7 +47,17 @@ namespace PuzzleSolver
             Filename = "";
             Filepath = "";
             Code = 0;
+            Target = null;
             Pieces = new List<Tile>();
+        }
+
+        public void Reset()
+        {
+            Filename = "";
+            Filepath = "";
+            Code = 0;
+            Target = null;
+            Pieces.Clear();
         }
 
         // updates Parser's Filename and Filepath properties
@@ -108,7 +118,7 @@ namespace PuzzleSolver
         //Takes the string array of all lines, finds the number of rows and the max row length to create rectangular 2D array
         //Transfers the string array into the 2D array of chars, iterates through each char in the array, if the char is significant, send it to CreateTile()
         //Result of CreateTile() is used in the constructor of a new Tile()
-        public List<Tile> Parse()
+        public void Parse()
         {
             string[] allLines = ReadFile();
             int colLength = allLines.Length;
@@ -161,7 +171,6 @@ namespace PuzzleSolver
             Pieces.Sort();
             Target = Pieces[Pieces.Count - 1];
             Pieces[Pieces.Count - 1].Target = true;
-            return Pieces;
         }
     }
 }

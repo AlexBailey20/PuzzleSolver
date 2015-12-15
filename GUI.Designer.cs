@@ -33,8 +33,6 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SolveButton = new System.Windows.Forms.Button();
-            this.PauseButton = new System.Windows.Forms.Button();
-            this.StopButton = new System.Windows.Forms.Button();
             this.NotificationBox = new System.Windows.Forms.RichTextBox();
             this.RotationCheck = new System.Windows.Forms.CheckBox();
             this.ReflectionCheck = new System.Windows.Forms.CheckBox();
@@ -86,26 +84,6 @@
             this.SolveButton.UseVisualStyleBackColor = true;
             this.SolveButton.Click += new System.EventHandler(this.PlayButton_Click);
             // 
-            // PauseButton
-            // 
-            this.PauseButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.PauseButton.Location = new System.Drawing.Point(118, 43);
-            this.PauseButton.Name = "PauseButton";
-            this.PauseButton.Size = new System.Drawing.Size(100, 100);
-            this.PauseButton.TabIndex = 5;
-            this.PauseButton.Text = "Pause";
-            this.PauseButton.UseVisualStyleBackColor = true;
-            // 
-            // StopButton
-            // 
-            this.StopButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.StopButton.Location = new System.Drawing.Point(224, 43);
-            this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(100, 100);
-            this.StopButton.TabIndex = 6;
-            this.StopButton.Text = "Stop";
-            this.StopButton.UseVisualStyleBackColor = true;
-            // 
             // NotificationBox
             // 
             this.NotificationBox.Location = new System.Drawing.Point(13, 612);
@@ -117,7 +95,7 @@
             // RotationCheck
             // 
             this.RotationCheck.AutoSize = true;
-            this.RotationCheck.Location = new System.Drawing.Point(363, 80);
+            this.RotationCheck.Location = new System.Drawing.Point(138, 80);
             this.RotationCheck.Name = "RotationCheck";
             this.RotationCheck.Size = new System.Drawing.Size(210, 29);
             this.RotationCheck.TabIndex = 8;
@@ -127,14 +105,14 @@
             // ReflectionCheck
             // 
             this.ReflectionCheck.AutoSize = true;
-            this.ReflectionCheck.Location = new System.Drawing.Point(596, 80);
+            this.ReflectionCheck.Location = new System.Drawing.Point(366, 80);
             this.ReflectionCheck.Name = "ReflectionCheck";
             this.ReflectionCheck.Size = new System.Drawing.Size(226, 29);
             this.ReflectionCheck.TabIndex = 9;
             this.ReflectionCheck.Text = "Include Reflections";
             this.ReflectionCheck.UseVisualStyleBackColor = true;
             // 
-            // listView1
+            // ComponentsList
             // 
             this.ComponentsList.Location = new System.Drawing.Point(12, 149);
             this.ComponentsList.Name = "ComponentsList";
@@ -142,7 +120,7 @@
             this.ComponentsList.TabIndex = 10;
             this.ComponentsList.UseCompatibleStateImageBehavior = false;
             // 
-            // listView2
+            // SolutionsList
             // 
             this.SolutionsList.Location = new System.Drawing.Point(12, 380);
             this.SolutionsList.Name = "SolutionsList";
@@ -162,8 +140,6 @@
             this.Controls.Add(this.ReflectionCheck);
             this.Controls.Add(this.RotationCheck);
             this.Controls.Add(this.NotificationBox);
-            this.Controls.Add(this.StopButton);
-            this.Controls.Add(this.PauseButton);
             this.Controls.Add(this.SolveButton);
             this.Controls.Add(this.menuStrip1);
             this.DoubleBuffered = true;
@@ -187,8 +163,6 @@
         private System.Windows.Forms.Button SolveButton;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createToolStripMenuItem;
-        private System.Windows.Forms.Button PauseButton;
-        private System.Windows.Forms.Button StopButton;
         private System.Windows.Forms.RichTextBox NotificationBox;
         private System.Windows.Forms.CheckBox RotationCheck;
         private System.Windows.Forms.CheckBox ReflectionCheck;
