@@ -14,12 +14,14 @@ namespace PuzzleSolver
         private int positions;
         private char[,] dimensions;
 
+        //Column offset for finding positions
         public int cOff
         {
             get { return c_off; }
             set { c_off = value; }
         }
 
+        //Row offset for finding positions
         public int rOff
         {
             get { return r_off; }
@@ -27,24 +29,27 @@ namespace PuzzleSolver
 
         }
 
+        //Row offset of the first character in the top row for placement in the first empty tile
         public int Topleft
         {
             get { return topleft; }
             set { topleft = value; }
         }
 
+        //Number of different positions based on the offsets to be used in the for loop
         public int Positions
         {
             get { return positions; }
             set { positions = value; }
         }
 
+        //character matrix
         public char[,] Dimensions
         {
             get { return dimensions; }
             set { dimensions = value; }
         }
-
+        //Constructor for the Orientation object, initializes the character matrix and finds the offset of the first character in the top row to be used in the empty tile recursion
         public Orientation(char[,] dimension, int csize, int rsize)
         {
             Dimensions = dimension;
@@ -57,7 +62,7 @@ namespace PuzzleSolver
                 }
             }
         }
-
+        //Takes two character matrices and compares if they have identical dimensions and entries or not
         public bool CheckSame(char[,] potential)
         {
             if (potential.GetLength(0) != Dimensions.GetLength(0) || potential.GetLength(1) != Dimensions.GetLength(1))
@@ -79,14 +84,15 @@ namespace PuzzleSolver
             }
             return true;
         }
-
+        //For the tile placement recursion, this method is used to find all the different positions the rectangle surrounding this piece can be placed in the solution
         public void FindPos(int csol, int rsol)
         {
             cOff = csol - dimensions.GetLength(0) + 1;
             rOff = rsol - dimensions.GetLength(1) + 1;
             Positions = cOff * rOff;
         }
-
+        //Checks if a piece can be placed in the solution by making sure it fits in the dimensions and making sure it will not overlap a character with a character in place
+        //If it can go in, the piece is added to the running_solution and its color is added to the color matrix and the method returns true
         public bool PlaceInSolution(char[,] running_solution, int[,] running_color, int ii, int jj, int color)
         {
             if ((ii + dimensions.GetLength(0) > running_solution.GetLength(0)) || (jj + dimensions.GetLength(1) - Topleft > running_solution.GetLength(1)) || (jj - Topleft < 0))
@@ -116,7 +122,9 @@ namespace PuzzleSolver
             }
             return true;
         }
-
+        //Used in the solution building recursion
+        //Takes the pieces in this orientation and pulls it from the running_solution
+        //Sets the color of the spots it was pulled from back to the default -1
         internal void RemoveFromSolution(char[,] running_solution, int[,] running_colors, int ii, int jj)
         {
             for (int i = 0; i < dimensions.GetLength(0); i++)

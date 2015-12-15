@@ -11,9 +11,10 @@ namespace PuzzleSolver
         private Tile target;
         private List<Tile> pieces;
 
+        //File to be parsed by the parser
         public string Filename
         {
-            get { return filename; }
+            get { return filename; } 
             set { filename = value; }
         }
 
@@ -23,18 +24,21 @@ namespace PuzzleSolver
             set { filepath = value; }
         }
 
+        //List of Tiles, the result of the Parsing
         public List<Tile> Pieces
         {
             get { return pieces; }
             set { pieces = value; }
         }
 
+        //Tile which represents the solution
         public Tile Target
         {
             get { return target; }
             set { target = value; }
         }
 
+        //Int to keep track of used color codes and set subsequent Tiles' color codes
         public int Code
         {
             get { return code; }

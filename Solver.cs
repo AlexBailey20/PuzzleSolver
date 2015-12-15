@@ -19,64 +19,67 @@ namespace PuzzleSolver
         private List<Tile> pieces;
         private List<int[,]> colorcodes;
 
+        //Size of the smallest piece, used for checking empty space possibilities
         public int Smallest
         {
             get { return smallest; }
             set { smallest = value; }
         }
+        //Bool which indicates if the Target has rotational and reflective symmetry
         public bool Symmetric
         {
             get { return symmetric; }
             set { symmetric = value; }
         }
+        //Size of the biggest remaining piece, used for checking empty space possiblities
         public int Biggest
         {
             get { return biggest; }
             set { biggest = value; }
         }
-
+        //Number of elements in a column in the solution
         public int solCSize
         {
             get { return solcsize; }
             set { solcsize = value; }
         }
-
+        //Number of elements in a row in the solution
         public int solRSize
         {
             get { return solrsize; }
             set { solrsize = value; }
         }
-
+        //Bool to indicate if this is a pentomino puzzle
         public bool Pent
         {
             get { return pent; }
             set { pent = value; }
         }
-
+        //Bool to indicate if the solutions need to be rotated upon completion or not
         public bool Rotate
         {
             get { return rotate; }
             set { rotate = value; }
         }
-
+        //Solution Tile
         public Tile Target
         {
             get { return target; }
             set { target = value; }
         }
-
+        //List of all pieces brought in by the Parser
         public List<Tile> Pieces
         {
             get { return pieces; }
             set { pieces = value; }
         }
-
+        //Integer matrices which represent each found solution with ints representing different Tile color codes
         public List<int[,]> Colorcodes
         {
             get { return colorcodes; }
             set { colorcodes = value; }
         }
-
+        //Constructor
         public Solver()
         {
             Smallest = 0;
@@ -103,7 +106,7 @@ namespace PuzzleSolver
         }
 
         //Check all the sizes of tiles to see if solution tile is the same size or smaller than sum of other tiles
-        //If smaller, check to see if equal to some sum of other tile sizes
+        //If smaller, indicate to the User that not all tiles will be used
         public int CheckSizes()
         {
             Rotate = Target.CheckDimensionRotation();
@@ -130,7 +133,7 @@ namespace PuzzleSolver
             else
                 return 0;
         }
-
+        //For each Tile, check if it matches a different Tile in some orientation, if so, set their color codes to be the same
         public void CheckDuplicateTiles()
         {
             for (int i = 1; i < Pieces.Count; i++)
@@ -140,6 +143,8 @@ namespace PuzzleSolver
                 }
         }
 
+        //Optimization which finds the size of all enclosed empty spaces in the running solution. If the smallest is too small or if the biggest is too small, the running solution fails
+        //Additionally, if its a pentomino puzzle and a space is not a multiple of 5, the solution fails
         public bool EmptySpaceCheck(bool[,] spaces, int csize, int rsize)
         {
             int small = -1;
@@ -163,6 +168,7 @@ namespace PuzzleSolver
             return (small < Smallest || big < Biggest);
         }
 
+        //Called by EmptySpaceCheck to find all different enclosed empty spaces in the running solution
         public int SpaceRecursion(bool[,] spaces, int i, int j, int csize, int rsize)
         {
             if (i < 0 || j < 0 || i >= csize || j >= rsize)
@@ -261,7 +267,10 @@ namespace PuzzleSolver
                 }
             }
         }
-
+        //Recursive solution finding algorithm which works by filling spaces from the top left across each row until it gets to the bottom right
+        //Each piece is tried for each of its orientations to fill that spot, creating a new branch in the solution tree
+        //When the entire matrix is filled, the solution is checked to be unique or repeated
+        //This is the preferred algorithm when no piece is abnormally large
         public void SolutionBuildingRecursion(List<Tile> puzzle_pieces, char[,] running_solution, int[,] running_colors, int ii, int jj)
         {
             int j = jj;
@@ -354,7 +363,7 @@ namespace PuzzleSolver
                 j = 0;
             }
         }
-
+        //Same method as above, but takes into account potential unused Tiles for puzzles which have too many pieces
         public void SolutionBuildingRecursionSubsets(List<Tile> puzzle_pieces, char[,] running_solution, int[,] running_colors, int ii, int jj, int sum)
         {
             int j = jj;
@@ -446,7 +455,7 @@ namespace PuzzleSolver
                 j = 0;
             }
         }
-
+        //Checks sizes to see if solution is possible, fixes a Tile if applicable to apply that optimization, sorts the Tiles by size, biggest first, and calls the appropriate algorithm
         public int Solve()
         {
             int i = CheckSizes();

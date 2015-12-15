@@ -73,6 +73,7 @@ namespace PuzzleSolver
             {
                 Console.WriteLine("Target(s) found.");
                 solutions = Solver.Colorcodes;
+                Console.WriteLine(Solver.Colorcodes.Count);
                 Writer.Compose(solutions);          // will deprecate when displays updated
                 UI.PopulateSolutions();             // "
             }
