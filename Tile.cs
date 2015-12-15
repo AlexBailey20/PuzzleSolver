@@ -228,7 +228,7 @@ namespace PuzzleSolver
             return true;
         }
 
-        public bool CheckRotationalSymmetry()
+        public bool Symmetry()
         {
             if (Dimensions.GetLength(0) != Dimensions.GetLength(1))
                 return false;
@@ -273,6 +273,22 @@ namespace PuzzleSolver
                     {
                         return false;
                     }
+                }
+            }
+            return true;
+        }
+
+        //Returns a bool indicating whether or not the solution has rotational symmetry
+        public bool CheckRotationalSymmetry()
+        {
+            if (Dimensions.GetLength(0) != Dimensions.GetLength(1))
+                return false;
+            for (int i = 0; i < Dimensions.GetLength(0); i++)
+            {
+                for (int j = 0; j < Dimensions.GetLength(1); j++)
+                {
+                    if (Dimensions[i, j] != Dimensions[j, Dimensions.GetLength(1) - i - 1])
+                        return false;
                 }
             }
             return true;
@@ -409,14 +425,21 @@ namespace PuzzleSolver
         }
 
         //Method to find each unique rotation and reflection for this tile
-        public void FindOrientations(char[,] initialorientation, int csize, int rsize)
+        public void FindOrientations(char[,] initialorientation, int csize, int rsize, bool refloption, bool rotaoption)
         {
             Orientation o1 = new Orientation(initialorientation, csize, rsize);
             Orientations.Add(o1);
-            Reflect(initialorientation);
-            Rotate90(initialorientation);
-            Rotate180(initialorientation);
-            Rotate270(initialorientation);
+            if (refloption)
+            {
+                Reflect(initialorientation);
+
+            }
+            if (rotaoption)
+            {
+                Rotate90(initialorientation, refloption);
+                Rotate180(initialorientation, refloption);
+                Rotate270(initialorientation, refloption);
+            }
         }
 
         //
@@ -467,7 +490,7 @@ namespace PuzzleSolver
         }
 
         //Methods which rotate a 2D char array either 90, 180, or 270 degrees and checks its uniqueness, then calls reflect on the rotated version
-        public void Rotate90(char[,] o)
+        public void Rotate90(char[,] o, bool refloption)
         {
             char[,] rotated = new char[o.GetLength(1), o.GetLength(0)];
             bool uni = true;
@@ -490,14 +513,22 @@ namespace PuzzleSolver
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 Orientations.Add(m);
-                Reflect(rotated);
+                if (refloption)
+                {
+                    Reflect(rotated);
+                }
             }
             else
-                Reflect(Orientations[r].Dimensions);
+            {
+                if (refloption)
+                {
+                    Reflect(Orientations[r].Dimensions);
+                }
+            }
         }
 
         // 
-        public void Rotate180(char[,] o)
+        public void Rotate180(char[,] o, bool refloption)
         {
             char[,] rotated = new char[o.GetLength(0), o.GetLength(1)];
             bool uni = true;
@@ -522,16 +553,22 @@ namespace PuzzleSolver
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 Orientations.Add(m);
-                Reflect(rotated);
+                if (refloption)
+                {
+                    Reflect(rotated);
+                }
             }
             else
             {
-                Reflect(Orientations[r].Dimensions);
+                if (refloption)
+                {
+                    Reflect(Orientations[r].Dimensions);
+                }
             }
         }
 
         //
-        public void Rotate270(char[,] o)
+        public void Rotate270(char[,] o, bool refloption)
         {
             char[,] rotated = new char[o.GetLength(1), o.GetLength(0)];
             bool uni = true;
@@ -556,11 +593,17 @@ namespace PuzzleSolver
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 Orientations.Add(m);
-                Reflect(rotated);
+                if (refloption)
+                {
+                    Reflect(rotated);
+                }
             }
             else
             {
-                Reflect(Orientations[r].Dimensions);
+                if (refloption)
+                {
+                    Reflect(Orientations[r].Dimensions);
+                }
             }
         }
 
