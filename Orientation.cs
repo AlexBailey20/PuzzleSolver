@@ -60,17 +60,17 @@ namespace PuzzleSolver
 
         public bool CheckSame(char[,] potential)
         {
-            if(potential.GetLength(0) != Dimensions.GetLength(0) || potential.GetLength(1) != Dimensions.GetLength(1))
+            if (potential.GetLength(0) != Dimensions.GetLength(0) || potential.GetLength(1) != Dimensions.GetLength(1))
             {
                 return false;
             }
             else
             {
-                for(int i = 0; i < Dimensions.GetLength(0); i++)
+                for (int i = 0; i < Dimensions.GetLength(0); i++)
                 {
-                    for(int j = 0; j < Dimensions.GetLength(1); j++)
+                    for (int j = 0; j < Dimensions.GetLength(1); j++)
                     {
-                        if(potential[i,j] != Dimensions[i, j])
+                        if (potential[i, j] != Dimensions[i, j])
                         {
                             return false;
                         }

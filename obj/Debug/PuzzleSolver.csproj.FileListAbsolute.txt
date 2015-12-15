@@ -12,3 +12,5 @@ C:\Users\wesbonelli\Desktop\PuzzleSolver\bin\Debug\PuzzleSolver.pdb
 C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.csprojResolveAssemblyReference.cache
 C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.GUI.resources
 C:\Users\wesbonelli\Desktop\PuzzleSolver\obj\Debug\PuzzleSolver.csproj.GenerateResource.Cache
+C:\Users\Xeny\Documents\Visual Studio 2015\Projects\PuzzleSolver\PuzzleSolver\obj\Debug\PuzzleSolver.GUI.resources
+C:\Users\Xeny\Documents\Visual Studio 2015\Projects\PuzzleSolver\PuzzleSolver\obj\Debug\PuzzleSolver.csproj.GenerateResource.Cache
