@@ -19,7 +19,7 @@ namespace PuzzleSolver
         private int coff;
         private int roff;
         private int colorcode;
-        private bool solution;
+        private bool target;
 
         public char[,] Dimensions
         {
@@ -81,23 +81,40 @@ namespace PuzzleSolver
             set { roff = value; }
         }
 
-        public int ColorCode
+        public int Colorcode
         {
             get { return colorcode; }
             set { colorcode = value; }
         }
 
-        public bool Solution
+        public bool Target
         {
-            get { return solution; }
-            set { solution = value; }
+            get { return target; }
+            set { target = value; }
+        }
+
+        // copy constructor
+        public Tile(Tile tile)
+        {
+            Dimensions = tile.Dimensions;
+            Orientations = tile.Orientations;
+            rSize = tile.rSize;
+            cSize = tile.cSize;
+            Size = tile.Size;
+            Positions = tile.Positions;
+            cSol = tile.cSol;
+            rSol = tile.rSol;
+            cOff = tile.cOff;
+            rOff = tile.rOff;
+            Colorcode = tile.Colorcode;
+            Target = tile.Target;
         }
 
         //Constructor, takes a 2D char array and finds the number of chars which are significant (non-space)
         public Tile(char[,] input, int row, int col, int code)
         {
             Dimensions = input;
-            ColorCode = code;
+            Colorcode = code;
             Orientations = new List<Orientation>();
             rSize = row;
             cSize = col;
@@ -107,30 +124,25 @@ namespace PuzzleSolver
             Positions = 0;
             cOff = 0;
             rOff = 0;
+            Target = false;
             char c = ' ';
-            Solution = false;
             this.Compress();
-            for(int i=0; i < cSize; i++)
+            for (int i = 0; i < cSize; i++)
             {
-                for(int j = 0; j < rSize; j++)
+                for (int j = 0; j < rSize; j++)
                 {
                     if (Dimensions[i, j] != c)
-                    {
                         Size += 1;
-                    }
                 }
             }
         }
 
-        // checks if tile 
         public void CheckIsomorphic(Tile t)
         {
-            for(int i = 0; i < t.Orientations.Count; i++)
+            for (int i = 0; i < t.Orientations.Count; i++)
             {
                 if (t.Orientations[i].CheckSame(Dimensions))
-                {
-                    ColorCode = t.ColorCode;
-                }
+                    Colorcode = t.Colorcode;
             }
         }
 
@@ -138,99 +150,79 @@ namespace PuzzleSolver
         public int CompareTo(object obj)
         {
             if (obj == null) return 1;
-
             Tile t = obj as Tile;
             if (t != null)
                 return this.Size.CompareTo(t.Size);
             else
-            {
                 return 0;
-            }
         }
-        
+
         //Method which finds the number of different ways the Tile can be placed on the blank solution array
         public void FindPositions()
         {
-            for(int i = 0; i < Orientations.Count; i++)
-            {
+            for (int i = 0; i < Orientations.Count; i++)
                 Orientations[i].FindPos(cSol, rSol);
-            }
         }
 
         //Compares each element in the potential_solution to the actual solution. Bounds are safe as both are defined by the same values
         public bool CheckValid(char[,] potentialsolution)
         {
-            for(int i = 0; i < cSize; i++)
+            for (int i = 0; i < cSize; i++)
             {
-                for(int j = 0; j < rSize; j++)
+                for (int j = 0; j < rSize; j++)
                 {
-                    if(potentialsolution[i,j] != Dimensions[i, j])
-                    {
+                    if (potentialsolution[i, j] != Dimensions[i, j])
                         return false;
-                    }
                 }
             }
             return true;
         }
 
-        // 
         public bool CheckNewSolution(int[,] runningcolors, List<int[,]> colorsolutions)
         {
             bool repeatedsolution = true;
-            for(int i = 0; i < colorsolutions.Count; i++)
+            for (int i = 0; i < colorsolutions.Count; i++)
             {
                 repeatedsolution = true;
-                for(int j = 0; j < runningcolors.GetLength(0); j++)
+                for (int j = 0; j < runningcolors.GetLength(0); j++)
                 {
-                    for(int k = 0; k < runningcolors.GetLength(1); k++)
+                    for (int k = 0; k < runningcolors.GetLength(1); k++)
                     {
-                        if(runningcolors[j,k] != colorsolutions[i][j, k])
+                        if (runningcolors[j, k] != colorsolutions[i][j, k])
                         {
                             repeatedsolution = false;
                             break;
                         }
                     }
                     if (!repeatedsolution)
-                    {
                         break;
-                    }
                 }
                 if (repeatedsolution)
-                {
                     return false;
-                }
             }
             return CheckAgainstSolutionRotations(runningcolors, colorsolutions);
         }
 
-        // 
         public bool CheckAgainstSolutionRotations(int[,] runningcolors, List<int[,]> colorsolutions)
         {
-            for(int i = 0; i < colorsolutions.Count; i++)
+            for (int i = 0; i < colorsolutions.Count; i++)
             {
-                if(CheckReflection(runningcolors, colorsolutions[i]) || CheckRotation90(runningcolors, colorsolutions[i]) || CheckRotation180(runningcolors, colorsolutions[i]) || CheckRotation270(runningcolors, colorsolutions[i])){
+                if (CheckReflection(runningcolors, colorsolutions[i]) || CheckRotation90(runningcolors, colorsolutions[i]) || CheckRotation180(runningcolors, colorsolutions[i]) || CheckRotation270(runningcolors, colorsolutions[i]))
                     return false;
-                }
-
             }
             return true;
         }
 
-        //
         public bool CheckReflection(int[,] runningcolors, int[,] colorsolution)
         {
-            if(runningcolors.GetLength(0) != colorsolution.GetLength(0) || runningcolors.GetLength(1) != colorsolution.GetLength(1))
-            {
+            if (runningcolors.GetLength(0) != colorsolution.GetLength(0) || runningcolors.GetLength(1) != colorsolution.GetLength(1))
                 return false;
-            }
             for (int i = 0; i < runningcolors.GetLength(0); i++)
             {
                 for (int j = 0; j < runningcolors.GetLength(1); j++)
                 {
                     if (runningcolors[i, j] != colorsolution[colorsolution.GetLength(0) - i - 1, j])
-                    {
                         return false;
-                    }
                 }
             }
             return true;
@@ -238,18 +230,14 @@ namespace PuzzleSolver
 
         public bool CheckRotationalSymmetry()
         {
-            if(dimensions.GetLength(0) != dimensions.GetLength(1))
-            {
+            if (Dimensions.GetLength(0) != Dimensions.GetLength(1))
                 return false;
-            }
-            for(int i = 0; i < dimensions.GetLength(0); i++)
+            for (int i = 0; i < Dimensions.GetLength(0); i++)
             {
-                for(int j = 0; j < dimensions.GetLength(1); j++)
+                for (int j = 0; j < Dimensions.GetLength(1); j++)
                 {
-                    if(dimensions[i,j] != dimensions[j, dimensions.GetLength(1) - i - 1])
-                    {
+                    if (Dimensions[i, j] != Dimensions[j, Dimensions.GetLength(1) - i - 1])
                         return false;
-                    }
                 }
             }
             return true;
@@ -257,17 +245,17 @@ namespace PuzzleSolver
 
         public bool CheckDimensionRotation()
         {
-            if(dimensions.GetLength(0) < dimensions.GetLength(1))
+            if (Dimensions.GetLength(0) < Dimensions.GetLength(1))
             {
-                char[,] rotated = new char[dimensions.GetLength(1), dimensions.GetLength(0)];
-                for(int i = 0; i < rotated.GetLength(0); i++)
+                char[,] rotated = new char[Dimensions.GetLength(1), Dimensions.GetLength(0)];
+                for (int i = 0; i < rotated.GetLength(0); i++)
                 {
-                    for(int j = 0; j < rotated.GetLength(1); j++)
+                    for (int j = 0; j < rotated.GetLength(1); j++)
                     {
-                        rotated[i, j] = dimensions[dimensions.GetLength(0) - j - 1, i];
+                        rotated[i, j] = Dimensions[Dimensions.GetLength(0) - j - 1, i];
                     }
                 }
-                dimensions = rotated;
+                Dimensions = rotated;
                 cSize = rotated.GetLength(0);
                 rSize = rotated.GetLength(1);
                 return true;
@@ -277,11 +265,11 @@ namespace PuzzleSolver
 
         public bool CheckReflectedSymmetry()
         {
-            for (int i = 0; i < dimensions.GetLength(0); i++)
+            for (int i = 0; i < Dimensions.GetLength(0); i++)
             {
-                for (int j = 0; j < dimensions.GetLength(1); j++)
+                for (int j = 0; j < Dimensions.GetLength(1); j++)
                 {
-                    if (dimensions[i, j] != dimensions[dimensions.GetLength(0)-i-1, j])
+                    if (Dimensions[i, j] != Dimensions[Dimensions.GetLength(0) - i - 1, j])
                     {
                         return false;
                     }
@@ -292,11 +280,11 @@ namespace PuzzleSolver
 
         public bool Check180Symmetry()
         {
-            for (int i = 0; i < dimensions.GetLength(0); i++)
+            for (int i = 0; i < Dimensions.GetLength(0); i++)
             {
-                for (int j = 0; j < dimensions.GetLength(1); j++)
+                for (int j = 0; j < Dimensions.GetLength(1); j++)
                 {
-                    if (dimensions[i, j] != dimensions[dimensions.GetLength(0) - i - 1, dimensions.GetLength(1) - j - 1])
+                    if (Dimensions[i, j] != Dimensions[Dimensions.GetLength(0) - i - 1, dimensions.GetLength(1) - j - 1])
                     {
                         return false;
                     }
@@ -309,9 +297,7 @@ namespace PuzzleSolver
         public bool CheckRotation90(int[,] runningcolors, int[,] colorsolution)
         {
             if (runningcolors.GetLength(1) != colorsolution.GetLength(0) || runningcolors.GetLength(0) != colorsolution.GetLength(1))
-            {
                 return false;
-            }
             bool refl = true;
             int[,] reflected = new int[colorsolution.GetLength(1), colorsolution.GetLength(0)];
             for (int i = 0; i < runningcolors.GetLength(0); i++)
@@ -320,15 +306,11 @@ namespace PuzzleSolver
                 {
                     reflected[i, j] = colorsolution[j, runningcolors.GetLength(1) - i - 1];
                     if (runningcolors[i, j] != colorsolution[j, runningcolors.GetLength(1) - i - 1])
-                    {
                         refl = false;
-                    }
                 }
             }
             if (refl)
-            {
                 return true;
-            }
             return CheckReflection(runningcolors, reflected);
         }
 
@@ -336,9 +318,7 @@ namespace PuzzleSolver
         public bool CheckRotation180(int[,] runningcolors, int[,] colorsolution)
         {
             if (runningcolors.GetLength(0) != colorsolution.GetLength(0) || runningcolors.GetLength(1) != colorsolution.GetLength(1))
-            {
                 return false;
-            }
             bool refl = true;
             int[,] reflected = new int[colorsolution.GetLength(0), colorsolution.GetLength(1)];
             for (int i = 0; i < runningcolors.GetLength(0); i++)
@@ -347,15 +327,11 @@ namespace PuzzleSolver
                 {
                     reflected[i, j] = colorsolution[colorsolution.GetLength(0) - i - 1, colorsolution.GetLength(1) - j - 1];
                     if (runningcolors[i, j] != colorsolution[colorsolution.GetLength(0) - i - 1, colorsolution.GetLength(1) - j - 1])
-                    {
                         refl = false;
-                    }
                 }
             }
             if (refl)
-            {
                 return true;
-            }
             return CheckReflection(runningcolors, reflected);
         }
 
@@ -363,9 +339,7 @@ namespace PuzzleSolver
         public bool CheckRotation270(int[,] runningcolors, int[,] colorsolution)
         {
             if (runningcolors.GetLength(1) != colorsolution.GetLength(0) || runningcolors.GetLength(0) != colorsolution.GetLength(1))
-            {
                 return false;
-            }
             bool refl = true;
             int[,] reflected = new int[colorsolution.GetLength(1), colorsolution.GetLength(0)];
             for (int i = 0; i < runningcolors.GetLength(0); i++)
@@ -374,15 +348,11 @@ namespace PuzzleSolver
                 {
                     reflected[i, j] = colorsolution[colorsolution.GetLength(0) - j - 1, i];
                     if (runningcolors[i, j] != colorsolution[colorsolution.GetLength(0) - j - 1, i])
-                    {
                         refl = false;
-                    }
                 }
             }
             if (refl)
-            {
                 return true;
-            }
             return CheckReflection(runningcolors, reflected);
         }
 
@@ -396,30 +366,26 @@ namespace PuzzleSolver
                     if (Orientations[g].Dimensions[i, j] != ' ')
                     {
                         if (potential_solution[i + col_offset, j + row_offset] != ' ')
-                        {
                             return false;
-                        }
                     }
                 }
             }
             return true;
         }
-        
+
         //Method which takes a potential solution and a placement of this tile on that solution space, adds the tile to that solution space
         public bool PlaceInSolution(char[,] potentialsolution, int[,] potentialcolors, int coloffset, int rowoffset, int g)
         {
-            if(!CheckOverlap(potentialsolution, coloffset, rowoffset, g))
-            {
+            if (!CheckOverlap(potentialsolution, coloffset, rowoffset, g))
                 return false;
-            }
-            for(int i = 0; i < Orientations[g].Dimensions.GetLength(0); i++)
+            for (int i = 0; i < Orientations[g].Dimensions.GetLength(0); i++)
             {
-                for(int j = 0; j < Orientations[g].Dimensions.GetLength(1); j++)
+                for (int j = 0; j < Orientations[g].Dimensions.GetLength(1); j++)
                 {
                     if (Orientations[g].Dimensions[i, j] != ' ')
-                    {                        
+                    {
                         potentialsolution[i + coloffset, j + rowoffset] = Orientations[g].Dimensions[i, j];
-                        potentialcolors[i + coloffset, j + rowoffset] = ColorCode;
+                        potentialcolors[i + coloffset, j + rowoffset] = Colorcode;
                     }
                 }
             }
@@ -443,44 +409,33 @@ namespace PuzzleSolver
         }
 
         //Method to find each unique rotation and reflection for this tile
-        public void FindOrientations(char[,] initialorientation, int csize, int rsize, bool reflOption, bool rotaOption)
+        public void FindOrientations(char[,] initialorientation, int csize, int rsize)
         {
             Orientation o1 = new Orientation(initialorientation, csize, rsize);
             Orientations.Add(o1);
-            if (reflOption)
-            {
-                Reflect(initialorientation);
-
-            }
-            if (rotaOption)
-            {
-                Rotate90(initialorientation, reflOption);
-                Rotate180(initialorientation, reflOption);
-                Rotate270(initialorientation, reflOption);
-            }
+            Reflect(initialorientation);
+            Rotate90(initialorientation);
+            Rotate180(initialorientation);
+            Rotate270(initialorientation);
         }
 
         //
         public bool CheckDimensions(char[,] dims)
         {
-            if(dims.GetLength(0) > cSol || dims.GetLength(1) > rSol)
-            {
+            if (dims.GetLength(0) > cSol || dims.GetLength(1) > rSol)
                 return false;
-            }
             return true;
         }
 
         //
         public bool RunningCheck(char[,] possolution)
         {
-            for(int i = 0; i < possolution.GetLength(0); i++)
+            for (int i = 0; i < possolution.GetLength(0); i++)
             {
                 for (int j = 0; j < possolution.GetLength(1); j++)
                 {
-                    if(possolution[i,j] != ' ' && possolution[i,j] != Dimensions[i, j])
-                    {
+                    if (possolution[i, j] != ' ' && possolution[i, j] != Dimensions[i, j])
                         return true;
-                    }
                 }
             }
             return false;
@@ -490,15 +445,13 @@ namespace PuzzleSolver
         public void Reflect(char[,] initialorientation)
         {
             char[,] reflected = new char[initialorientation.GetLength(0), initialorientation.GetLength(1)];
-            for(int i = 0; i < initialorientation.GetLength(0); i++)
+            for (int i = 0; i < initialorientation.GetLength(0); i++)
             {
-                for(int j = 0; j < initialorientation.GetLength(1); j++)
-                {
+                for (int j = 0; j < initialorientation.GetLength(1); j++)
                     reflected[i, j] = initialorientation[initialorientation.GetLength(0) - i - 1, j];
-                }
             }
             bool uni = true;
-            for(int n = 0; n < Orientations.Count; n++)
+            for (int n = 0; n < Orientations.Count; n++)
             {
                 if (Orientations[n].CheckSame(reflected))
                 {
@@ -514,7 +467,7 @@ namespace PuzzleSolver
         }
 
         //Methods which rotate a 2D char array either 90, 180, or 270 degrees and checks its uniqueness, then calls reflect on the rotated version
-        public void Rotate90(char[,] o, bool reflOption)
+        public void Rotate90(char[,] o)
         {
             char[,] rotated = new char[o.GetLength(1), o.GetLength(0)];
             bool uni = true;
@@ -522,9 +475,7 @@ namespace PuzzleSolver
             for (int i = 0; i < o.GetLength(1); i++)
             {
                 for (int j = 0; j < o.GetLength(0); j++)
-                {
                     rotated[i, j] = o[j, o.GetLength(1) - i - 1];
-                }
             }
             for (int n = 0; n < Orientations.Count; n++)
             {
@@ -539,63 +490,14 @@ namespace PuzzleSolver
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 Orientations.Add(m);
-                if (reflOption)
-                {
-                    Reflect(rotated);
-                }
+                Reflect(rotated);
             }
             else
-            {
-                if (reflOption)
-                {
-                    Reflect(Orientations[r].Dimensions);
-                }
-            }
+                Reflect(Orientations[r].Dimensions);
         }
 
         // 
-        public void Fix(bool rotl, bool refl, bool turn)
-        {
-            if (rotl && refl)
-            {
-                Orientation o = orientations[0];
-                for(int i = 0; i < orientations.Count; i++)
-                {
-                    if(orientations[i].topLeft == 0)
-                    {
-                        o = orientations[i];
-                        break;
-                    }
-                }
-                orientations.RemoveRange(0, orientations.Count);
-                orientations.Add(o);
-            }
-            else if(refl && turn && !rotl)
-            {
-                orientations.RemoveAt(7);
-                orientations.RemoveAt(6);
-                orientations.RemoveAt(5);
-                orientations.RemoveAt(4);
-                orientations.RemoveAt(3);
-                orientations.RemoveAt(1);
-            }
-            else if (refl && !turn)
-            {
-                orientations.RemoveAt(7);
-                orientations.RemoveAt(5);
-                orientations.RemoveAt(3);
-                orientations.RemoveAt(1);
-                    
-            }
-            else if (turn && !refl)
-            {
-                orientations.RemoveAt(7);
-                orientations.RemoveAt(6);
-                orientations.RemoveAt(5);
-                orientations.RemoveAt(4);
-            }
-        }
-        public void Rotate180(char[,] o, bool reflOption)
+        public void Rotate180(char[,] o)
         {
             char[,] rotated = new char[o.GetLength(0), o.GetLength(1)];
             bool uni = true;
@@ -620,22 +522,16 @@ namespace PuzzleSolver
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 Orientations.Add(m);
-                if (reflOption)
-                {
-                    Reflect(rotated);
-                }
+                Reflect(rotated);
             }
             else
             {
-                if (reflOption)
-                {
-                    Reflect(Orientations[r].Dimensions);
-                }
+                Reflect(Orientations[r].Dimensions);
             }
         }
 
         //
-        public void Rotate270(char[,] o, bool reflOption)
+        public void Rotate270(char[,] o)
         {
             char[,] rotated = new char[o.GetLength(1), o.GetLength(0)];
             bool uni = true;
@@ -660,17 +556,53 @@ namespace PuzzleSolver
             {
                 Orientation m = new Orientation(rotated, rotated.GetLength(0), rotated.GetLength(1));
                 Orientations.Add(m);
-                if (reflOption)
-                {
-                    Reflect(rotated);
-                }
+                Reflect(rotated);
             }
             else
             {
-                if (reflOption)
+                Reflect(Orientations[r].Dimensions);
+            }
+        }
+
+        public void Fix(bool rotl, bool refl, bool turn)
+        {
+            if (rotl && refl)
+            {
+                Orientation o = Orientations[0];
+                for (int i = 0; i < Orientations.Count; i++)
                 {
-                    Reflect(Orientations[r].Dimensions);
+                    if (Orientations[i].Topleft == 0)
+                    {
+                        o = Orientations[i];
+                        break;
+                    }
                 }
+                Orientations.RemoveRange(0, Orientations.Count);
+                Orientations.Add(o);
+            }
+            else if (refl && turn && !rotl)
+            {
+                Orientations.RemoveAt(7);
+                Orientations.RemoveAt(6);
+                Orientations.RemoveAt(5);
+                Orientations.RemoveAt(4);
+                Orientations.RemoveAt(3);
+                Orientations.RemoveAt(1);
+            }
+            else if (refl && !turn)
+            {
+                Orientations.RemoveAt(7);
+                Orientations.RemoveAt(5);
+                Orientations.RemoveAt(3);
+                Orientations.RemoveAt(1);
+
+            }
+            else if (turn && !refl)
+            {
+                Orientations.RemoveAt(7);
+                Orientations.RemoveAt(6);
+                Orientations.RemoveAt(5);
+                Orientations.RemoveAt(4);
             }
         }
 
@@ -681,28 +613,20 @@ namespace PuzzleSolver
             int jmin = rSize;
             int imax = 0;
             int jmax = 0;
-            for(int i = 0; i< cSize; i++)
+            for (int i = 0; i < cSize; i++)
             {
-                for(int j = 0; j < rSize; j++)
+                for (int j = 0; j < rSize; j++)
                 {
-                    if(Dimensions[i,j] != ' ')
+                    if (Dimensions[i, j] != ' ')
                     {
-                        if(i < imin)
-                        {
+                        if (i < imin)
                             imin = i;
-                        }
-                        if(j < jmin)
-                        {
+                        if (j < jmin)
                             jmin = j;
-                        }
-                        if(i > imax)
-                        {
+                        if (i > imax)
                             imax = i;
-                        }
-                        if(j > jmax)
-                        {
+                        if (j > jmax)
                             jmax = j;
-                        }
                     }
                 }
             }
@@ -712,9 +636,7 @@ namespace PuzzleSolver
             for (int n = 0; n < this.cSize; n++)
             {
                 for (int m = 0; m < this.rSize; m++)
-                {
                     new_dim[n, m] = Dimensions[n + imin, m + jmin];
-                }
             }
             this.Dimensions = new_dim;
         }

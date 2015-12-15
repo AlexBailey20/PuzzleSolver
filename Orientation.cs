@@ -10,20 +10,14 @@ namespace PuzzleSolver
     {
         private int c_off;
         private int r_off;
-        private char[,] dimensions;
-        private int top_left;
+        private int topleft;
         private int positions;
+        private char[,] dimensions;
 
         public int cOff
         {
             get { return c_off; }
             set { c_off = value; }
-        }
-
-        public int topLeft
-        {
-            get { return top_left; }
-            set { top_left = value; }
         }
 
         public int rOff
@@ -33,10 +27,10 @@ namespace PuzzleSolver
 
         }
 
-        public char[,] Dimensions
+        public int Topleft
         {
-            get { return dimensions; }
-            set { dimensions = value; }
+            get { return topleft; }
+            set { topleft = value; }
         }
 
         public int Positions
@@ -45,19 +39,38 @@ namespace PuzzleSolver
             set { positions = value; }
         }
 
+        public char[,] Dimensions
+        {
+            get { return dimensions; }
+            set { dimensions = value; }
+        }
+
+        public Orientation(char[,] dimension, int csize, int rsize)
+        {
+            Dimensions = dimension;
+            for (int j = 0; j < Dimensions.GetLength(1); j++)
+            {
+                if (Dimensions[0, j] != ' ')
+                {
+                    Topleft = j;
+                    break;
+                }
+            }
+        }
+
         public bool CheckSame(char[,] potential)
         {
-            if(potential.GetLength(0) != Dimensions.GetLength(0) || potential.GetLength(1) != Dimensions.GetLength(1))
+            if (potential.GetLength(0) != Dimensions.GetLength(0) || potential.GetLength(1) != Dimensions.GetLength(1))
             {
                 return false;
             }
             else
             {
-                for(int i = 0; i < Dimensions.GetLength(0); i++)
+                for (int i = 0; i < Dimensions.GetLength(0); i++)
                 {
-                    for(int j = 0; j < Dimensions.GetLength(1); j++)
+                    for (int j = 0; j < Dimensions.GetLength(1); j++)
                     {
-                        if(potential[i,j] != Dimensions[i, j])
+                        if (potential[i, j] != Dimensions[i, j])
                         {
                             return false;
                         }
@@ -66,9 +79,17 @@ namespace PuzzleSolver
             }
             return true;
         }
+
+        public void FindPos(int csol, int rsol)
+        {
+            cOff = csol - dimensions.GetLength(0) + 1;
+            rOff = rsol - dimensions.GetLength(1) + 1;
+            Positions = cOff * rOff;
+        }
+
         public bool PlaceInSolution(char[,] running_solution, int[,] running_color, int ii, int jj, int color)
         {
-            if ((ii + dimensions.GetLength(0) > running_solution.GetLength(0)) || (jj + dimensions.GetLength(1) - top_left > running_solution.GetLength(1)) || (jj - top_left < 0))
+            if ((ii + dimensions.GetLength(0) > running_solution.GetLength(0)) || (jj + dimensions.GetLength(1) - Topleft > running_solution.GetLength(1)) || (jj - Topleft < 0))
             {
                 return false;
             }
@@ -76,7 +97,7 @@ namespace PuzzleSolver
             {
                 for (int j = 0; j < dimensions.GetLength(1); j++)
                 {
-                    if (dimensions[i, j] != ' ' && running_solution[ii + i, jj + j - top_left] != ' ')
+                    if (dimensions[i, j] != ' ' && running_solution[ii + i, jj + j - Topleft] != ' ')
                     {
                         return false;
                     }
@@ -88,30 +109,12 @@ namespace PuzzleSolver
                 {
                     if (dimensions[n, m] != ' ')
                     {
-                        running_solution[ii + n, jj + m - top_left] = dimensions[n, m];
-                        running_color[ii + n, jj + m - top_left] = color;
+                        running_solution[ii + n, jj + m - Topleft] = dimensions[n, m];
+                        running_color[ii + n, jj + m - Topleft] = color;
                     }
                 }
             }
             return true;
-        }
-        public void FindPos(int csol, int rsol)
-        {
-            cOff = csol - dimensions.GetLength(0) + 1;
-            rOff = rsol - dimensions.GetLength(1) + 1;
-            Positions = cOff * rOff;
-        }
-        public Orientation(char[,] dimension, int csize, int rsize)
-        {
-            Dimensions = dimension;
-            for (int j = 0; j < Dimensions.GetLength(1); j++)
-            {
-                if (Dimensions[0, j] != ' ')
-                {
-                    top_left = j;
-                    break;
-                }
-            }
         }
 
         internal void RemoveFromSolution(char[,] running_solution, int[,] running_colors, int ii, int jj)
@@ -122,8 +125,8 @@ namespace PuzzleSolver
                 {
                     if (dimensions[i, j] != ' ')
                     {
-                        running_solution[i + ii, j + jj - top_left] = ' ';
-                        running_colors[i + ii, j + jj - top_left] = -1;
+                        running_solution[i + ii, j + jj - Topleft] = ' ';
+                        running_colors[i + ii, j + jj - Topleft] = -1;
                     }
                 }
             }

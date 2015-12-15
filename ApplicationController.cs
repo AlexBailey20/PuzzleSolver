@@ -16,8 +16,8 @@ namespace PuzzleSolver
     {
         private static GUI ui = null;
         private static Parser parser = null;
-        private string filename = null;
-        private string filepath = null;
+        private static Writer writer = null;
+        private static Solver solver = null;
 
         public delegate void EventHandler(object sender, GUIEventArgs e);
         public event EventHandler OnEvent;
@@ -34,127 +34,48 @@ namespace PuzzleSolver
             set { parser = value; }
         }
 
-        public string Filename
+        public static Writer Writer
         {
-            get { return filename; }
-            set { filename = value; }
+            get { return writer; }
+            set { writer = value; }
         }
 
-        public string Filepath
+        public static Solver Solver
         {
-            get { return filepath; }
-            set { filepath = value; }
+            get { return solver; }
+            set { solver = value; }
         }
 
-        public void UpdateFile(string name, string path)
+        public void Update(string name, string path)
         {
-            Filename = name;
-            Filepath = path;
-            Parser.Update(Filename, Filepath);
-            Log("Filename updated to: " + Filename + ". Filepath updated to: " + Filepath + ".");
+            Parser.Update(name, path);
             Parser.Parse();
-        }
-
-        public void UpdateTileDisplays()
-        {
-
+            Solver.Update(Parser.Target, Parser.Pieces);
+            string[] lines = Parser.ReadFile();             // will deprecate once displays are updated
+            UI.PopulateComponents(lines);                   // "
+            Log("File at " + path + " parsed.");
         }
 
         public void RunSearch()
         {
-
-            int i = Parser.CheckSizes();
-            if (i == -1)
+            Log("Searching for solutions...");
+            int result = Solver.Solve();
+            List<int[,]> solutions = new List<int[,]>();
+            if (result == 0)
             {
-                Console.WriteLine("No solution possible");
+                Console.WriteLine("No target possible.");
             }
-            else if (i == 0)
+            else if (result == 1)
             {
-                Console.WriteLine("Some pieces may not be used if a solution is found");
+                Console.WriteLine("No target found.");
             }
-            Parser.CheckDuplicateTiles();
-            List<Tile> options = new List<Tile>();
-            char[,] blanksolution = new char[Parser.Solution.cSize, Parser.Solution.rSize];
-            int[,] blankcolors = new int[Parser.Solution.cSize, Parser.Solution.rSize];
-            bool rotl = false;
-            bool refl = false;
-            bool turn = false;
-            for (int k = 0; k < Parser.Solution.cSize; k++)
+            else if (result == 2)
             {
-                for (int j = 0; j < Parser.Solution.rSize; j++)
-                {
-                    blanksolution[k, j] = ' ';
-                    blankcolors[k, j] = -1;
-                }
+                Console.WriteLine("Target(s) found.");
+                solutions = Solver.Colorcodes;
+                Writer.Compose(solutions);          // will deprecate when displays updated
+                UI.PopulateSolutions();             // "
             }
-            foreach (Tile t in Parser.Pieces)
-            {
-                if (t.Solution == false)
-                {
-                    options.Add(t);
-                    Parser.Pent = Parser.Pent && (t.Size == 5);
-                }
-                if (t.Solution)
-                {
-                    rotl = t.CheckRotationalSymmetry();
-                    refl = t.CheckReflectedSymmetry();
-                    turn = t.Check180Symmetry();
-                }
-            }
-            options.Reverse();
-            for(int w = 0; w < options.Count; w++)
-            {
-                if(options[w].Orientations.Count == 8)
-                {
-                    options[w].Fix(rotl, refl, turn);
-                    break;
-                }
-            }  
-            List<char[,]> foundsolutions = new List<char[,]>();
-            if (options[0].Size > Parser.Solution.Size / 2)
-            {
-                Parser.Puzzlesolutions = Parser.SolutionRecursion(options, foundsolutions, blanksolution, blankcolors, Parser.Solution.cSize, Parser.Solution.rSize);
-            }
-            else if(i == 0)
-            {
-                Parser.SolutionBuildingRecursionSubsets(options, blanksolution, blankcolors, 0, 0, 0);
-            }
-            else
-            {
-                Parser.SolutionBuildingRecursion(options, blanksolution, blankcolors, 0, 0);
-            }
-            for (int x = 0; x < Parser.Puzzlesolutions.Count; x++)
-            {
-                Console.WriteLine("Solution " + (x + 1));
-                for (int y = 0; y < Parser.Solution.cSize; y++)
-                {
-                    for (int z = 0; z < Parser.Solution.rSize; z++)
-                    {
-                        Console.Write(Parser.Puzzlesolutions[x][y, z]);
-                    }
-                    Console.WriteLine();
-                }
-            }
-            for (int q = 0; q < Parser.Colorcodes.Count; q++)
-            {
-                Console.WriteLine("Color_Codes " + (q + 1));
-                for (int s = 0; s < Parser.Solution.cSize; s++)
-                {
-                    for (int f = 0; f < Parser.Solution.rSize; f++)
-                    {
-                        Console.Write(Parser.Colorcodes[q][s, f]);
-                    }
-                    Console.WriteLine();
-                }
-            }
-            if(Parser.Colorcodes.Count == 0)
-            {
-                Console.WriteLine("No solution found");
-            }
-            Console.ReadKey();
-            Console.ReadKey();
-            Console.WriteLine("Finished");
-            Console.ReadKey();
         }
 
         private void Log(string message)
@@ -172,6 +93,8 @@ namespace PuzzleSolver
         {
             UI = new GUI();
             Parser = new Parser();
+            Writer = new Writer();
+            Solver = new Solver();
             Application.Run(UI);
         }
     }
