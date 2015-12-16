@@ -19,7 +19,6 @@ namespace PuzzleSolver
         private bool rotate;
         private bool reflectionoption;
         private bool rotationoption;
-        private bool clean;
         private Tile target;
         private List<Tile> pieces;
         private List<int[,]> colorcodes;
@@ -31,132 +30,147 @@ namespace PuzzleSolver
         private bool running;
         private bool complete;
 
+        //Size of the smallest piece, used for checking empty space possibilities
         public int Smallest
         {
             get { return smallest; }
             set { smallest = value; }
         }
 
+        //Size of the biggest remaining piece, used for checking empty space possiblities
         public int Biggest
         {
             get { return biggest; }
             set { biggest = value; }
         }
 
+        //Number of elements in a column in the solution
         public int solCSize
         {
             get { return solcsize; }
             set { solcsize = value; }
         }
 
+        //Number of elements in a row in the solution
         public int solRSize
         {
             get { return solrsize; }
             set { solrsize = value; }
         }
 
+        //Represents search algorithm chosen
         public int Algorithm
         {
             get { return algorithm; }
             set { algorithm = value; }
         }
 
+        //Represents current state of search
         public int SolutionState
         {
             get { return solutionstate; }
             set { solutionstate = value; }
         }
 
+        //Bool to indicate if this is a pentomino puzzle
         public bool Pent
         {
             get { return pent; }
             set { pent = value; }
         }
-
-        public bool Clean
-        {
-            get { return clean; }
-            set { clean = value; }
-        }
-
+        
+        //Bool to set piece reflection
         public bool ReflectionOption
         {
             get { return reflectionoption; }
             set { reflectionoption = value; }
         }
 
+        //Bool to set piece rotation
         public bool RotationOption
         {
             get { return rotationoption; }
             set { rotationoption = value; }
         }
 
+        //Bool to indicate if the solutions need to be rotated upon completion or not
         public bool Rotate
         {
             get { return rotate; }
             set { rotate = value; }
         }
 
+        //Solution tile
         public Tile Target
         {
             get { return target; }
             set { target = value; }
         }
 
+        //List of all pieces brought in by the Parser
         public List<Tile> Pieces
         {
             get { return pieces; }
             set { pieces = value; }
         }
 
+        //List of all pieces brought in by the Parser
         public List<int[,]> Colorcodes
         {
             get { return colorcodes; }
             set { colorcodes = value; }
         }
 
+        //Current solution being checked (for display)
         public int[,] Current
         {
             get { return current; }
             set { current = value; }
         }
 
+        //List of non-target tiles
         public List<Tile> Options
         {
             get { return options; }
             set { options = value; }
         }
 
+        //Blank solution to build each on, reset after each is built
         public char[,] Blanksolution
         {
             get { return blanksolution; }
             set { blanksolution = value; }
         }
 
+        //Blank color map to build each on, reset after each is built
         public int[,] Blankcolors
         {
             get { return blankcolors; }
             set { blankcolors = value; }
         }
 
+        //worker thread to run search
         public static Thread Solvethread
         {
             get { return solvethread; }
             set { solvethread = value; }
         }
 
+        //Bool to indicate if search is in progress
         public bool Running
         {
             get { return running; }
             set { running = value; }
         }
 
+        //Bool to indicae if search is complete
         public bool Complete
         {
             get { return complete; }
             set { complete = value; }
         }
 
+        //Constructor
         public Solver()
         {
             Smallest = 0;
@@ -176,12 +190,14 @@ namespace PuzzleSolver
             Complete = false;
         }
 
+        // updates input sources
         public void UpdateInput(Tile targettile, List<Tile> tilepieces)
         {
             Target = targettile;
             Pieces = tilepieces;
         }
 
+        //Resets properties for new solution search
         public void Reset()
         {
             Console.Out.WriteLine("reset");
@@ -201,6 +217,7 @@ namespace PuzzleSolver
             Complete = false;
         }
 
+        //Checks sizes to see if solution is possible, fixes a Tile if applicable to apply that optimization, sorts the Tiles by size, assigns appropriate search algorithm
         public void Run()
         {
             Console.Out.WriteLine("solverrun");
@@ -210,8 +227,6 @@ namespace PuzzleSolver
                 SolutionState = 0;
                 return;               // case 0: no solution possible
             }
-            //if (i == 0)
-                //Console.WriteLine("Some pieces may not be used if a target is found.");
             Options = new List<Tile>();
             Blanksolution = new char[Target.cSize, Target.rSize];
             Blankcolors = new int[Target.cSize, Target.rSize];
@@ -238,7 +253,7 @@ namespace PuzzleSolver
                 }
                 else
                 {
-                    options.Add(t);
+                    Options.Add(t);
                     Pent = Pent && (t.Size == 5);
                 }
             }
@@ -261,6 +276,7 @@ namespace PuzzleSolver
             Solvethread.Start();
         }
 
+        //Stops execution of the search routine
         public void Stop()
         {
             Complete = true;
@@ -268,6 +284,7 @@ namespace PuzzleSolver
             return;
         }
 
+        //Runs search algorithm
         public void Solve()
         {
             if (Algorithm == 0)
@@ -320,6 +337,8 @@ namespace PuzzleSolver
                 return 0;
         }
 
+        //Optimization which finds the size of all enclosed empty spaces in the running solution. If the smallest is too small or if the biggest is too small, the running solution fails
+        //Additionally, if its a pentomino puzzle and a space is not a multiple of 5, the solution fails
         public bool EmptySpaceCheck(bool[,] spaces, int csize, int rsize)
         {
             int small = -1;
@@ -343,6 +362,7 @@ namespace PuzzleSolver
             return (small < Smallest || big < Biggest);
         }
 
+        //Called by EmptySpaceCheck to find all different enclosed empty spaces in the running solution
         public int SpaceRecursion(bool[,] spaces, int i, int j, int csize, int rsize)
         {
             if (i < 0 || j < 0 || i >= csize || j >= rsize)
@@ -443,6 +463,10 @@ namespace PuzzleSolver
             }
         }
 
+        //Recursive solution finding algorithm which works by filling spaces from the top left across each row until it gets to the bottom right
+        //Each piece is tried for each of its orientations to fill that spot, creating a new branch in the solution tree
+        //When the entire matrix is filled, the solution is checked to be unique or repeated
+        //This is the preferred algorithm when no piece is abnormally large
         public void SolutionBuildingRecursion(List<Tile> puzzle_pieces, char[,] running_solution, int[,] running_colors, int ii, int jj)
         {
             Current = running_colors;
@@ -535,6 +559,7 @@ namespace PuzzleSolver
             }
         }
 
+        //Same method as above, but takes into account potential unused Tiles for puzzles which have too many pieces
         public void SolutionBuildingRecursionSubsets(List<Tile> puzzle_pieces, char[,] running_solution, int[,] running_colors, int ii, int jj, int sum)
         {
             Current = running_colors;

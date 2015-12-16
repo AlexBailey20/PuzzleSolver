@@ -16,8 +16,7 @@ namespace PuzzleSolver
     {
         private ApplicationController controller = null;
         private FlowLayoutPanel layoutpanel;
-        private FlowLayoutPanel reflrotacontrolpanel;
-        private FlowLayoutPanel navigationcontrolpanel;
+        private FlowLayoutPanel checkscontrolpanel;
         private FlowLayoutPanel controlpanel;
         private FlowLayoutPanel displaypanel;
         private FlowLayoutPanel componentsdisplaypanel;
@@ -26,66 +25,70 @@ namespace PuzzleSolver
         private List<List<ListViewItem>> sols;
         private int currentsol;
 
+        //Panel containing the entire display
         public FlowLayoutPanel Layoutpanel
         {
             get { return layoutpanel; }
             set { layoutpanel = value; }
         }
 
-        public FlowLayoutPanel Reflrotacontrolpanel
+        //Panel containing checkboxes
+        public FlowLayoutPanel Checkscontrolpanel
         {
-            get { return reflrotacontrolpanel; }
-            set { reflrotacontrolpanel = value; }
+            get { return checkscontrolpanel; }
+            set { checkscontrolpanel = value; }
         }
 
-        public FlowLayoutPanel Navigationcontrolpanel
-        {
-            get { return navigationcontrolpanel; }
-            set { navigationcontrolpanel = value; }
-        }
-
+        //Panel containing user controls (top of window)
         public FlowLayoutPanel Controlpanel
         {
             get { return controlpanel; }
             set { controlpanel = value; }
         }
 
+        //Panel containing display layout
         public FlowLayoutPanel Displaypanel
         {
             get { return displaypanel; }
             set { displaypanel = value; }
         }
 
+        //Panel containing top two displays
         public FlowLayoutPanel Componentsdisplaypanel
         {
             get { return componentsdisplaypanel; }
             set { componentsdisplaypanel = value; }
         }
 
+        //Panel containing bottom two displays
         public FlowLayoutPanel Solutionsdisplaypanel
         {
             get { return solutionsdisplaypanel; }
             set { solutionsdisplaypanel = value; }
         }
 
+        //Controller
         public ApplicationController Controller
         {
             get { return controller; }
             set { controller = value; }
         }
 
+        //List of solution representions for displays
         public List<List<ListViewItem>> Sols
         {
             get { return sols; }
             set { sols = value; }
         }
 
+        //Keeps track of current found solution displayed
         public int Currentsol
         {
             get { return currentsol; }
             set { currentsol = value; }
         }
 
+        //Constructor
         public GUI()
         {
             InitializeComponent();
@@ -93,8 +96,7 @@ namespace PuzzleSolver
             this.Height = (Screen.FromControl(this).Bounds.Height - 100);
             this.StartPosition = FormStartPosition.CenterScreen;
             Layoutpanel = new FlowLayoutPanel();                // everything
-            Reflrotacontrolpanel = new FlowLayoutPanel();       // reflection/rotation options
-            Navigationcontrolpanel = new FlowLayoutPanel();     // solution navigation
+            Checkscontrolpanel = new FlowLayoutPanel();       // reflection/rotation options
             Controlpanel = new FlowLayoutPanel();               // solve button, reflection/rotation options, and solution navigation
             Displaypanel = new FlowLayoutPanel();               // all displays
             Componentsdisplaypanel = new FlowLayoutPanel();     // top row of displays
@@ -104,16 +106,17 @@ namespace PuzzleSolver
             Arrange();
         }
 
+        //Sets up application screen
         public void Arrange()
         {
             Layoutpanel.FlowDirection = FlowDirection.TopDown;
             Layoutpanel.Width = this.Width;
             Layoutpanel.Height = this.Height;
 
-            Reflrotacontrolpanel.FlowDirection = FlowDirection.TopDown;
-            Reflrotacontrolpanel.Controls.Add(ReflectionCheck);
-            Reflrotacontrolpanel.Controls.Add(RotationCheck);
-            Reflrotacontrolpanel.Controls.Add(CurrentCheck);
+            Checkscontrolpanel.FlowDirection = FlowDirection.TopDown;
+            Checkscontrolpanel.Controls.Add(ReflectionCheck);
+            Checkscontrolpanel.Controls.Add(RotationCheck);
+            Checkscontrolpanel.Controls.Add(CurrentCheck);
             ReflectionCheck.Anchor = AnchorStyles.Left;
             RotationCheck.Anchor = AnchorStyles.Left;
             CurrentCheck.Anchor = AnchorStyles.Left;
@@ -125,7 +128,7 @@ namespace PuzzleSolver
             Controlpanel.Controls.Add(SolveButton);
             Controlpanel.Controls.Add(PreviousButton);
             Controlpanel.Controls.Add(NextButton);
-            Controlpanel.Controls.Add(Reflrotacontrolpanel);
+            Controlpanel.Controls.Add(Checkscontrolpanel);
 
             NotificationBox.Anchor = AnchorStyles.Left;
             NotificationBox.Width = Layoutpanel.Width;
@@ -176,24 +179,21 @@ namespace PuzzleSolver
             this.Controls.Add(Layoutpanel);
         }
 
+        //Returns rotationcheck status and grays it out during search
         public bool GetRotationOption()
         {
             RotationCheck.Enabled = false;
             return RotationCheck.Checked;
         }
 
+        //Returns reflectioncheck status and grays it out during search
         public bool GetReflectionOption()
         {
             ReflectionCheck.Enabled = false;
             return ReflectionCheck.Checked;
         }
 
-        public bool GetCurrentOption()
-        {
-            CurrentCheck.Enabled = false;
-            return CurrentCheck.Checked;
-        }
-
+        //sets checkboxes to enabled
         public void SetOptionsEnabled()
         {
             RotationCheck.Enabled = true;
@@ -201,12 +201,14 @@ namespace PuzzleSolver
             CurrentCheck.Enabled = true;
         }
 
+        //enables/disables solution display navigation buttons
         public void SetNavigation(bool nav)
         {
             NextButton.Enabled = nav;
             PreviousButton.Enabled = nav;
         }
 
+        //displays the next found solution
         public void NextSolution()
         {
             if (Currentsol == -1)
@@ -234,6 +236,7 @@ namespace PuzzleSolver
             }
         }
 
+        //displays the previous found solution
         public void PreviousSolution()
         {
             if (Currentsol == -1)
@@ -260,12 +263,14 @@ namespace PuzzleSolver
             }
         }
 
+        //For application output/feedback
         public void UpdateNotificationBox(string message)
         {
             NotificationBox.Clear();
             NotificationBox.AppendText(message);
         }
 
+        //Display puzzle pieces and target
         public void PopulateComponents(List<Tile> components)
         {
             if (ComponentsList.Columns.Count == 0)
@@ -347,6 +352,7 @@ namespace PuzzleSolver
             }
         }
 
+        //Display found solutions
         public void PopulateSolutions(List<int[,]> solutions)
         {
             SolutionsList.View = View.Details;
@@ -394,6 +400,7 @@ namespace PuzzleSolver
             SolutionsList.Show();
         }
 
+        //if CurrentCheck is on, updates the display for currently tried solution (called at 500 ms intervals)
         public void UpdateCurrent(int[,] current)
         {
             if (CurrentCheck.Checked)
@@ -439,11 +446,13 @@ namespace PuzzleSolver
             }
         }
 
+        //Clears the GUI's store of the currently tried solution
         public void ClearCurrent()
         {
             Current.Clear();
         }
 
+        //Assigns colors to puzzle pieces
         public void SetSubItemColor(Tile component, int[,] solution, ListViewItem row, int r, int j)
         {
             if (solution == null)
@@ -542,14 +551,12 @@ namespace PuzzleSolver
                     row.SubItems[r].BackColor = Color.PaleVioletRed;
                 if (solution[r, j] == 20)
                     row.SubItems[r].BackColor = Color.DimGray;
+                if (solution[r, j] > 20)
+                    row.SubItems[j].Text = component.Colorcode.ToString();
             }
         }
-        
-        private void toolStripButton1_Click(object sender, EventArgs e)
-        {
 
-        }
-
+        //opens file browser to selected input .txt file
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // create file browser
@@ -564,7 +571,6 @@ namespace PuzzleSolver
                 if (Controller == null)
                 {
                     Controller = new ApplicationController();
-                    Controller.OnEvent += new ApplicationController.EventHandler(OnEvent);
                 }
                 // update Controller's Filename and Filepath properties
                 string filename = openFileDialog.FileName;
@@ -575,31 +581,31 @@ namespace PuzzleSolver
                 Current.Clear();
                 Sols.Clear();
                 Currentsol = -1;
-                Controller.Update(filename, filepath);
+                SetNavigation(true);
+                Controller.Update(filename);
             }
         }
 
+        //Calls ApplicationController's Run method and begins search
         private void PlayButton_Click(object sender, EventArgs e)
         {
             SolutionsList.Clear();
             Sols.Clear();
             Currentsol = -1;
+            CurrentCheck.Enabled = false;
             Controller.Run();
         }
 
+        //Handler for moving to next solution displayed
         private void NextButton_Click(object sender, EventArgs e)
         {
             NextSolution();
         }
 
+        //Handler for moving to previous solution displayed
         private void PreviousButton_Click(object sender, EventArgs e)
         {
             PreviousSolution();
-        }
-
-        private void OnEvent(object sender, GUIEventArgs e)
-        {
-            //Console.Out.WriteLine(e.message + "\n");
         }
     }
 }
