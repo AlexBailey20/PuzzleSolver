@@ -23,6 +23,7 @@ namespace PuzzleSolver
         private Tile target;
         private List<Tile> pieces;
         private List<int[,]> colorcodes;
+        private int[,] current;
         List<Tile> options;
         char[,] blanksolution;
         int[,] blankcolors;
@@ -112,6 +113,12 @@ namespace PuzzleSolver
         {
             get { return colorcodes; }
             set { colorcodes = value; }
+        }
+
+        public int[,] Current
+        {
+            get { return current; }
+            set { current = value; }
         }
 
         public List<Tile> Options
@@ -364,76 +371,71 @@ namespace PuzzleSolver
         //Once a possible solution is found, it is checked against the solution tile and added (if valid) to the solution list which is returned
         public void SolutionRecursion(List<Tile> pieces, List<int[,]> codes, char[,] runningsolution, int[,] runningcolors, int csize, int rsize)
         {
-                List<Tile> smallerpieces = new List<Tile>();
-                for (int t = 1; t < pieces.Count; t++)
-                    smallerpieces.Add(pieces[t]);
-                Tile biggest = pieces[0];
-                Biggest = biggest.Size;
-                if (pieces.Count > 1)
-                    Biggest = pieces[1].Size;
-                bool found = false;
-                bool[,] spaces = new bool[csize, rsize];
-                for (int g = 0; g < biggest.Orientations.Count; g++)
+            Current = runningcolors;
+            List<Tile> smallerpieces = new List<Tile>();
+            for (int t = 1; t < pieces.Count; t++)
+                smallerpieces.Add(pieces[t]);
+            Tile biggest = pieces[0];
+            Biggest = biggest.Size;
+            if (pieces.Count > 1)
+                Biggest = pieces[1].Size;
+            bool found = false;
+            bool[,] spaces = new bool[csize, rsize];
+            for (int g = 0; g < biggest.Orientations.Count; g++)
+            {
+                for (int i = 0; i < biggest.Orientations[g].cOff; i++)
                 {
-                    for (int i = 0; i < biggest.Orientations[g].cOff; i++)
+                    for (int j = 0; j < biggest.Orientations[g].rOff; j++)
                     {
-                        for (int j = 0; j < biggest.Orientations[g].rOff; j++)
+                        if (biggest.PlaceInSolution(runningsolution, runningcolors, i, j, g))
                         {
-                            if (biggest.PlaceInSolution(runningsolution, runningcolors, i, j, g))
+                            if (smallerpieces.Count > 0)
                             {
-                                if (smallerpieces.Count > 0)
+                                for (int ii = 0; ii < csize; ii++)
                                 {
-                                    for (int ii = 0; ii < csize; ii++)
+                                    for (int jj = 0; jj < rsize; jj++)
                                     {
-                                        for (int jj = 0; jj < rsize; jj++)
-                                        {
-                                            spaces[ii, jj] = (runningsolution[ii, jj] == ' ' && Target.Dimensions[ii, jj] != ' ');
-                                        }
-                                    }
-                                    if (EmptySpaceCheck(spaces, csize, rsize))
-                                    {
-                                        biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
-                                        continue;
+                                        spaces[ii, jj] = (runningsolution[ii, jj] == ' ' && Target.Dimensions[ii, jj] != ' ');
                                     }
                                 }
-                                if (Target.RunningCheck(runningsolution))
+                                if (EmptySpaceCheck(spaces, csize, rsize))
                                 {
                                     biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
                                     continue;
                                 }
-                                if (smallerpieces.Count == 0)
+                            }
+                            if (Target.RunningCheck(runningsolution))
+                            {
+                                biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
+                                continue;
+                            }
+                            if (smallerpieces.Count == 0)
+                            {
+                                if (Target.CheckValid(runningsolution) && Target.CheckNewSolution(runningcolors, Colorcodes))
                                 {
-                                    if (Target.CheckValid(runningsolution) && Target.CheckNewSolution(runningcolors, Colorcodes))
+                                    char[,] newsolution = new char[csize, rsize];
+                                    int[,] newcolors = new int[csize, rsize];
+                                    for (int n = 0; n < csize; n++)
                                     {
-                                        char[,] newsolution = new char[csize, rsize];
-                                        int[,] newcolors = new int[csize, rsize];
-                                        for (int n = 0; n < csize; n++)
+                                        for (int m = 0; m < rsize; m++)
                                         {
-                                            for (int m = 0; m < rsize; m++)
-                                            {
-                                                newsolution[n, m] = runningsolution[n, m];
-                                                newcolors[n, m] = runningcolors[n, m];
-                                            }
+                                            newsolution[n, m] = runningsolution[n, m];
+                                            newcolors[n, m] = runningcolors[n, m];
                                         }
-                                        Colorcodes.Add(newcolors);
-                                        found = true;
                                     }
-                                    biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
-                                    if (found)
-                                    {
-                                        break;
-                                    }
+                                    Colorcodes.Add(newcolors);
+                                    found = true;
                                 }
-                                else
+                                biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
+                                if (found)
                                 {
-                                    SolutionRecursion(smallerpieces, Colorcodes, runningsolution, runningcolors, csize, rsize);
-                                    biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
+                                    break;
                                 }
                             }
-                            if (found)
+                            else
                             {
-                                found = false;
-                                break;
+                                SolutionRecursion(smallerpieces, Colorcodes, runningsolution, runningcolors, csize, rsize);
+                                biggest.RemoveFromSolution(runningsolution, runningcolors, i, j, g);
                             }
                         }
                         if (found)
@@ -442,11 +444,18 @@ namespace PuzzleSolver
                             break;
                         }
                     }
+                    if (found)
+                    {
+                        found = false;
+                        break;
+                    }
                 }
+            }
         }
 
         public void SolutionBuildingRecursion(List<Tile> puzzle_pieces, char[,] running_solution, int[,] running_colors, int ii, int jj)
         {
+            Current = running_colors;
             int j = jj;
             bool[,] spaces = new bool[solCSize, solRSize];
             for (int i = ii; i < solCSize; i++)
@@ -538,6 +547,7 @@ namespace PuzzleSolver
 
         public void SolutionBuildingRecursionSubsets(List<Tile> puzzle_pieces, char[,] running_solution, int[,] running_colors, int ii, int jj, int sum)
         {
+            Current = running_colors;
             int j = jj;
             bool[,] spaces = new bool[solCSize, solRSize];
             for (int i = ii; i < solCSize; i++)

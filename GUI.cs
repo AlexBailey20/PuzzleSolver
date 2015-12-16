@@ -7,6 +7,7 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
 
 namespace PuzzleSolver
@@ -14,6 +15,48 @@ namespace PuzzleSolver
     public partial class GUI : Form
     {
         private ApplicationController controller = null;
+        private FlowLayoutPanel layoutpanel;
+        private FlowLayoutPanel reflrotacontrolpanel;
+        private FlowLayoutPanel controlpanel;
+        private FlowLayoutPanel displaypanel;
+        private FlowLayoutPanel componentsdisplaypanel;
+        private FlowLayoutPanel solutionsdisplaypanel;
+
+        public FlowLayoutPanel Layoutpanel
+        {
+            get { return layoutpanel; }
+            set { layoutpanel = value; }
+        }
+
+        public FlowLayoutPanel Reflrotacontrolpanel
+        {
+            get { return reflrotacontrolpanel; }
+            set { reflrotacontrolpanel = value; }
+        }
+
+        public FlowLayoutPanel Controlpanel
+        {
+            get { return controlpanel; }
+            set { controlpanel = value; }
+        }
+
+        public FlowLayoutPanel Displaypanel
+        {
+            get { return displaypanel; }
+            set { displaypanel = value; }
+        }
+
+        public FlowLayoutPanel Componentsdisplaypanel
+        {
+            get { return componentsdisplaypanel; }
+            set { componentsdisplaypanel = value; }
+        }
+
+        public FlowLayoutPanel Solutionsdisplaypanel
+        {
+            get { return solutionsdisplaypanel; }
+            set { solutionsdisplaypanel = value; }
+        }
 
         public ApplicationController Controller
         {
@@ -24,6 +67,84 @@ namespace PuzzleSolver
         public GUI()
         {
             InitializeComponent();
+            this.Width = (Screen.FromControl(this).Bounds.Width - 50);
+            this.Height = (Screen.FromControl(this).Bounds.Height - 100);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            Layoutpanel = new FlowLayoutPanel();                // everything
+            Reflrotacontrolpanel = new FlowLayoutPanel();       // reflection/rotation options
+            Controlpanel = new FlowLayoutPanel();               // solve button and reflection/rotation options
+            Displaypanel = new FlowLayoutPanel();               // all displays
+            Componentsdisplaypanel = new FlowLayoutPanel();     // top row of displays
+            Solutionsdisplaypanel = new FlowLayoutPanel();     // bottom row of displays
+            Arrange();
+        }
+
+        public void Arrange()
+        {
+            Layoutpanel.FlowDirection = FlowDirection.TopDown;
+            Layoutpanel.Width = this.Width;
+            Layoutpanel.Height = this.Height;
+
+            Reflrotacontrolpanel.FlowDirection = FlowDirection.TopDown;
+            Reflrotacontrolpanel.Controls.Add(ReflectionCheck);
+            Reflrotacontrolpanel.Controls.Add(RotationCheck);
+            ReflectionCheck.Anchor = AnchorStyles.Left;
+            RotationCheck.Anchor = AnchorStyles.Left;
+
+            Controlpanel.FlowDirection = FlowDirection.LeftToRight;
+            Controlpanel.Anchor = AnchorStyles.Left;
+            Controlpanel.Width = Layoutpanel.Width;
+            Controlpanel.Height = (SolveButton.Height + 5);
+            Controlpanel.Controls.Add(SolveButton);
+            Controlpanel.Controls.Add(Reflrotacontrolpanel);
+
+            NotificationBox.Anchor = AnchorStyles.Left;
+            NotificationBox.Width = Layoutpanel.Width;
+            NotificationBox.Height = 20;
+            NotificationBox.ReadOnly = true;
+
+            Displaypanel.FlowDirection = FlowDirection.TopDown;
+            Displaypanel.Anchor = AnchorStyles.Left;
+
+            Displaypanel.Width = (Layoutpanel.Width);
+            Displaypanel.Height = (Layoutpanel.Height - Controlpanel.Height - NotificationBox.Height - 40);
+
+            Componentsdisplaypanel.FlowDirection = FlowDirection.LeftToRight;
+            Componentsdisplaypanel.Anchor = AnchorStyles.Left;
+
+            Componentsdisplaypanel.Width = (Displaypanel.Width);
+            Componentsdisplaypanel.Height = (Displaypanel.Height / 2) - 10;
+
+            Solutionsdisplaypanel.FlowDirection = FlowDirection.LeftToRight;
+            Solutionsdisplaypanel.Anchor = AnchorStyles.Left;
+
+            Solutionsdisplaypanel.Width = (Displaypanel.Width);
+            Solutionsdisplaypanel.Height = (Displaypanel.Height / 2) - 10;
+
+            ComponentsList.Width = (Componentsdisplaypanel.Width / 2) - 5;
+            ComponentsList.Height = (Componentsdisplaypanel.Height) - 5;
+            Target.Width = (Componentsdisplaypanel.Width / 2) - 5;
+            Target.Height = (Componentsdisplaypanel.Height) - 5;
+            SolutionsList.Width = (Solutionsdisplaypanel.Width / 2) - 5;
+            SolutionsList.Height = (Solutionsdisplaypanel.Height) - 5;
+            Current.Width = (Solutionsdisplaypanel.Width / 2) - 5;
+            Current.Height = (Solutionsdisplaypanel.Height) - 5;
+
+            Componentsdisplaypanel.Controls.Add(Target);
+            Componentsdisplaypanel.Controls.Add(ComponentsList);
+
+            Solutionsdisplaypanel.Controls.Add(Current);
+            Solutionsdisplaypanel.Controls.Add(SolutionsList);
+
+            Displaypanel.Controls.Add(Componentsdisplaypanel);
+            Displaypanel.Controls.Add(Solutionsdisplaypanel);
+
+            Layoutpanel.Controls.Add(MenuStrip);
+            Layoutpanel.Controls.Add(Controlpanel);
+            Layoutpanel.Controls.Add(NotificationBox);
+            Layoutpanel.Controls.Add(Displaypanel);
+
+            this.Controls.Add(Layoutpanel);
         }
 
         public bool GetRotationOption()
@@ -55,58 +176,87 @@ namespace PuzzleSolver
             if (ComponentsList.Columns.Count == 0)
             {
                 ComponentsList.View = View.Details;
-                ComponentsList.GridLines = true;
-                ComponentsList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                ComponentsList.HeaderStyle = ColumnHeaderStyle.None;
+                Target.View = View.Details;
+                Target.HeaderStyle = ColumnHeaderStyle.None;
                 foreach (Tile component in components)
                 {
                     int rows = component.cSize;
                     int cols = component.rSize;
-                    while (ComponentsList.Columns.Count < cols)
-                        ComponentsList.Columns.Add("");
-                    //    for (int i = 0; i < ComponentsList.Columns.Count; i++)
-                    //        ComponentsList.Columns[i].TextAlign = HorizontalAlignment.Center;
-                    string[] rowchars = new string[cols];
-                    string[] empty = { };
-                    for (int j = 0; j < rows; j++)
+                    if (component == components.Last())
                     {
-                        var row = new ListViewItem();
-                        for (int k = 0; k < cols; k++)
+                        while (Target.Columns.Count < cols)
+                            Target.Columns.Add("");
+                        string[] rowchars = new string[cols];
+                        string[] empty = { };
+                        for (int j = 0; j < rows; j++)
                         {
-                            rowchars[k] = component.Dimensions[j, k].ToString();
-                            //Console.Out.WriteLine(rowchars[k]);
-                        }
-                        for (int r = 0; r < cols; r++)
-                        {
-                            row.SubItems.Add("");
-                            if (rowchars[r] != " ")
+                            var row = new ListViewItem();
+                            for (int k = 0; k < cols; k++)
                             {
-                                SetSubItemColor(component, null, row, j, r);
-                                row.UseItemStyleForSubItems = false;
+                                rowchars[k] = component.Dimensions[j, k].ToString();
                             }
-                            else
+                            for (int r = 0; r < cols; r++)
                             {
-                                row.SubItems[r].BackColor = Color.White;
-                                row.UseItemStyleForSubItems = false;
-                            }
+                                row.SubItems.Add("");
+                                if (rowchars[r] != " ")
+                                {
+                                    SetSubItemColor(component, null, row, j, r);
+                                    row.UseItemStyleForSubItems = false;
+                                }
+                                else
+                                {
+                                    row.SubItems[r].BackColor = Color.White;
+                                    row.UseItemStyleForSubItems = false;
+                                }
 
+                            }
+                            Target.Items.Add(row);
                         }
-                        ComponentsList.Items.Add(row);
                     }
-                    ComponentsList.Items.Add(new ListViewItem(empty));
+                    else
+                    {
+                        while (ComponentsList.Columns.Count < cols)
+                            ComponentsList.Columns.Add("");
+                        string[] rowchars = new string[cols];
+                        string[] empty = { };
+                        for (int j = 0; j < rows; j++)
+                        {
+                            var row = new ListViewItem();
+                            for (int k = 0; k < cols; k++)
+                            {
+                                rowchars[k] = component.Dimensions[j, k].ToString();
+                            }
+                            for (int r = 0; r < cols; r++)
+                            {
+                                row.SubItems.Add("");
+                                if (rowchars[r] != " ")
+                                {
+                                    SetSubItemColor(component, null, row, j, r);
+                                    row.UseItemStyleForSubItems = false;
+                                }
+                                else
+                                {
+                                    row.SubItems[r].BackColor = Color.White;
+                                    row.UseItemStyleForSubItems = false;
+                                }
+
+                            }
+                            ComponentsList.Items.Add(row);
+                        }
+                        ComponentsList.Items.Add(new ListViewItem(empty));
+                    }
                 }
                 ComponentsList.Refresh();
-            }
-            else
-            {
-
+                Target.Refresh();
             }
         }
 
         public void PopulateSolutions(List<int[,]> solutions)
         {
             SolutionsList.View = View.Details;
-            SolutionsList.GridLines = true;
-            SolutionsList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+            SolutionsList.HeaderStyle = ColumnHeaderStyle.None;
+            //SolutionsList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
             List<ListViewItem> allrows = new List<ListViewItem>();
             foreach(int[,] solution in solutions)
             {
@@ -114,8 +264,6 @@ namespace PuzzleSolver
                 int cols = solution.GetLength(0);
                 while (SolutionsList.Columns.Count < cols)
                     SolutionsList.Columns.Add("");
-           //     for (int i = 0; i < ComponentsList.Columns.Count; i++)
-           //         ComponentsList.Columns[i].TextAlign = HorizontalAlignment.Center;
                 string[] rowchars = new string[cols];
                 string[] empty = { };
                 for (int j = 0; j < rows; ++j)
@@ -140,14 +288,62 @@ namespace PuzzleSolver
                         }
 
                     }
-                    //SolutionsList.Items.Add(row);
                     allrows.Add(row);
                 }
-                allrows.Add(new ListViewItem(empty));
+                allrows.Add(new ListViewItem());
             }
             foreach (ListViewItem row in allrows)
-                SolutionsList.Items.Add(row);
+            {
+                if (!SolutionsList.Items.Contains(row))
+                    SolutionsList.Items.Add(row);
+            }
             SolutionsList.Refresh();
+        }
+
+        public void UpdateCurrent(int[,] current)
+        {
+            Current.Clear();
+            Current.View = View.Details;
+            Current.HeaderStyle = ColumnHeaderStyle.None;
+            List<ListViewItem> allrows = new List<ListViewItem>();
+            int rows = current.GetLength(1);
+            int cols = current.GetLength(0);
+            while (Current.Columns.Count < cols)
+                Current.Columns.Add("");
+            string[] rowchars = new string[cols];
+            string[] empty = { };
+            for (int j = 0; j < rows; ++j)
+            {
+                var row = new ListViewItem();
+                for (int k = 0; k < cols; k++)
+                {
+                    rowchars[k] = current[k, j].ToString();
+                }
+                for (int r = 0; r < cols; r++)
+                {
+                    row.SubItems.Add("");
+                    if (rowchars[r] != " ")
+                    {
+                        SetSubItemColor(null, current, row, r, j);
+                        row.UseItemStyleForSubItems = false;
+                    }
+                    else
+                    {
+                        row.SubItems[r].BackColor = Color.White;
+                        row.UseItemStyleForSubItems = false;
+                    }
+
+                }
+                allrows.Add(row);
+            }
+            foreach (ListViewItem row in allrows)
+                Current.Items.Add(row);
+            Current.Refresh();
+        }
+
+        public void ClearCurrent()
+        {
+            Current.Clear();
         }
 
         public void SetSubItemColor(Tile component, int[,] solution, ListViewItem row, int r, int j)
@@ -274,7 +470,9 @@ namespace PuzzleSolver
                 string filename = openFileDialog.FileName;
                 string filepath = Path.GetDirectoryName(filename);
                 ComponentsList.Clear();
+                Target.Clear();
                 SolutionsList.Clear();
+                Current.Clear();
                 Controller.Update(filename, filepath);
             }
         }
