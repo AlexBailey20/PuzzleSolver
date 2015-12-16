@@ -166,7 +166,7 @@ namespace PuzzleSolver
             Colorcodes = new List<int[,]>();
             Solvethread = new Thread(new ThreadStart(Run));
             Running = false;
-            Complete = false;
+            //Complete = false;
         }
 
         public void UpdateInput(Tile targettile, List<Tile> tilepieces)
@@ -177,6 +177,7 @@ namespace PuzzleSolver
 
         public void Reset()
         {
+            Console.Out.WriteLine("reset");
             Smallest = 0;
             Biggest = 0;
             solCSize = 0;
@@ -190,80 +191,73 @@ namespace PuzzleSolver
             Colorcodes.Clear();
             Solvethread = new Thread(new ThreadStart(Run));
             Running = false;
-            Complete = false;
+            //Complete = false;
         }
 
         public void Run()
         {
-            //Console.Out.WriteLine(Solvethread.ThreadState.ToString());
-            if (Running)
-                return;
-            else
+            Console.Out.WriteLine("solverrun");
+            int i = CheckSizes();
+            if (i == -1)
             {
-                int i = CheckSizes();
-                if (i == -1)
-                {
-                    SolutionState = 0;
-                    return;               // case 0: no solution possible
-                }
-                if (i == 0)
-                    //Console.WriteLine("Some pieces may not be used if a target is found.");
-                    CheckDuplicateTiles();
-                Options = new List<Tile>();
-                Blanksolution = new char[Target.cSize, Target.rSize];
-                Blankcolors = new int[Target.cSize, Target.rSize];
-                bool rotl = false;
-                bool refl = false;
-                bool turn = false;
-                // create blank solution map
-                for (int k = 0; k < Target.cSize; k++)
-                {
-                    for (int j = 0; j < Target.rSize; j++)
-                    {
-                        Blanksolution[k, j] = ' ';
-                        Blankcolors[k, j] = -1;
-                    }
-                }
-                // check pentomino and tile symemetry
-                foreach (Tile t in Pieces)
-                {
-                    if (t.Target)
-                    {
-                        rotl = t.CheckRotationalSymmetry();
-                        refl = t.CheckReflectedSymmetry();
-                        turn = t.Check180Symmetry();
-                    }
-                    else
-                    {
-                        options.Add(t);
-                        Pent = Pent && (t.Size == 5);
-                    }
-                }
-                Options.Reverse();
-                for (int w = 0; w < Options.Count; w++)
-                {
-                    if (Options[w].Orientations.Count == 8)
-                    {
-                        Options[w].Fix(rotl, refl, turn);
-                        break;
-                    }
-                }
-                if (Options[0].Size > Target.Size / 2)
-                    Algorithm = 0;
-                else if (i == 0)
-                    Algorithm = 1;
-                else
-                    Algorithm = 2;
-                Solvethread = new Thread(new ThreadStart(Solve));
-                Running = true;
-                Solvethread.Start();
+                SolutionState = 0;
+                return;               // case 0: no solution possible
             }
+            //if (i == 0)
+                //Console.WriteLine("Some pieces may not be used if a target is found.");
+            CheckDuplicateTiles();
+            Options = new List<Tile>();
+            Blanksolution = new char[Target.cSize, Target.rSize];
+            Blankcolors = new int[Target.cSize, Target.rSize];
+            bool rotl = false;
+            bool refl = false;
+            bool turn = false;
+            // create blank solution map
+            for (int k = 0; k < Target.cSize; k++)
+            {
+                for (int j = 0; j < Target.rSize; j++)
+                {
+                    Blanksolution[k, j] = ' ';
+                    Blankcolors[k, j] = -1;
+                }
+            }
+            // check pentomino and tile symemetry
+            foreach (Tile t in Pieces)
+            {
+                if (t.Target)
+                {
+                    rotl = t.CheckRotationalSymmetry();
+                    refl = t.CheckReflectedSymmetry();
+                    turn = t.Check180Symmetry();
+                }
+                else
+                {
+                    options.Add(t);
+                    Pent = Pent && (t.Size == 5);
+                }
+            }
+            Options.Reverse();
+            for (int w = 0; w < Options.Count; w++)
+            {
+                if (Options[w].Orientations.Count == 8)
+                {
+                    Options[w].Fix(rotl, refl, turn);
+                    break;
+                }
+            }
+            if (Options[0].Size > Target.Size / 2)
+                Algorithm = 0;
+            else if (i == 0)
+                Algorithm = 1;
+            else
+                Algorithm = 2;
+            Solvethread = new Thread(new ThreadStart(Solve));
+            Solvethread.Start();
         }
 
         public void Stop()
         {
-            Running = false;
-            Complete = true;
+            //Complete = true;
             Solvethread.Abort();
             return;
         }
