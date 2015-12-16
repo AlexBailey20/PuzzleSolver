@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Timers;
 using System.Windows.Forms;
 using System.Collections.Generic;
@@ -9,67 +10,52 @@ using System.Threading;
 
 namespace PuzzleSolver
 {
-    public class GUIEventArgs : EventArgs
-    {
-        public string message { get; set; }
-    }
 
     public class ApplicationController
     {
         private static GUI ui = null;
         private static Parser parser = null;
-        private static Writer writer = null;
         private static Solver solver = null;
         private static System.Timers.Timer timer = null;
         private string filename;
-        private string filepath;
 
-        public delegate void EventHandler(object sender, GUIEventArgs e);
-        public event EventHandler OnEvent;
-
+        //Windows Form containing our user interface code
         public static GUI UI
         {
             get { return ui; }
             set { ui = value; }
         }
 
+        //Parses input files
         public static Parser Parser
         {
             get { return parser; }
             set { parser = value; }
         }
 
-        public static Writer Writer
-        {
-            get { return writer; }
-            set { writer = value; }
-        }
-
+        //Solution search mechanism/algorithms
         public static Solver Solver
         {
             get { return solver; }
             set { solver = value; }
         }
 
+        //Timer to keep checking for solutions from Solver
         public static System.Timers.Timer Timer
         {
             get { return timer; }
             set { timer = value; }
         }
 
+        //input puzzle filename
         public String Filename
         {
             get { return filename; }
             set { filename = value; }
         }
 
-        public String Filepath
-        {
-            get { return filepath; }
-            set { filepath = value; }
-        }
-
-        public void Update(string name, string path)
+        //Updates all necessary propertis and prepares for solving when passed an input file
+        public void Update(string name)
         {
             Solver.Stop();
             Solver.Reset();
@@ -77,8 +63,7 @@ namespace PuzzleSolver
                 Timer.Close();
             Parser.Reset();
             Filename = name;
-            Filepath = path;
-            Parser.Update(name, path);
+            Parser.Update(name);
             Parser.Parse();
             Solver.UpdateInput(Parser.Target, Parser.Pieces);
             UI.PopulateComponents(Parser.Pieces);
@@ -86,6 +71,7 @@ namespace PuzzleSolver
             UI.UpdateNotificationBox("Input loaded from: " + name + ". Component tiles are multi-colored and target tile is black.");
         }
 
+        //conducts the search process
         public void Run()
         {
             if (!Solver.Running)
@@ -96,7 +82,7 @@ namespace PuzzleSolver
                 if (Timer != null)
                     Timer.Close();
                 Parser.Reset();
-                Parser.Update(filename, filepath);
+                Parser.Update(filename);
                 Parser.Parse();
                 Solver.UpdateInput(Parser.Target, Parser.Pieces);
                 Solver.RotationOption = UI.GetRotationOption();
@@ -112,6 +98,9 @@ namespace PuzzleSolver
             }
         }
 
+        //pulls results from Solver based on SolutionState, called every 500ms or so while search is running
+        //reports findings, takes necessary closing actions once search is complete
+        //writes solution file
         public void GetResults()
         {
             int result = Solver.SolutionState;
@@ -146,23 +135,56 @@ namespace PuzzleSolver
                 UI.SetNavigation(true);
                 Timer.Close();
                 Solver.Running = false;
+                string temp = Filename.Remove((Filename.Length) - 4, 4);
+                string p = temp + "sol.txt";
+                StreamWriter sw = new StreamWriter(p, true);
+                string[] all = Compose(Solver.Colorcodes);
+                foreach (string str in all)
+                    sw.WriteLine(str);
+                sw.Close();
             }
             UI.SetOptionsEnabled();
         }
 
+        public string[] Compose(List<int[,]> colorcodes)
+        {
+            int count = 0;
+            string line = "";
+            List<string> alllines = new List<string>();
+            List<string> templines = new List<string>();
+            // iterate through all solutions
+            foreach (int[,] colorcode in colorcodes)
+            {
+                // iterate through each row
+                for (int n = 0; n < colorcode.GetLength(1); n++)
+                {
+                    // iterate through all characters
+                    for (int m = 0; m < colorcode.GetLength(0); m++)
+                    {
+                        line += colorcode[m, n];
+                    }
+                    // form subarray for each solution
+                    templines.Add(line);
+                    line = "";
+                }
+                // add each subarray to array holding all solutions
+                foreach (string templine in templines)
+                    alllines.Add(templine);
+                alllines.Add("");
+                // clear templines for next pass
+                templines.Clear();
+                // advance counter
+                count++;
+            }
+            // change to array and pass to WriteFile
+            string[] alllinesarray = alllines.ToArray();
+            return alllinesarray;
+        }
+
+        //called eveery 500ms to check for solutions
         private void OnCheck(Object source, System.Timers.ElapsedEventArgs e)
         {
             GetResults();
-        }
-
-        private void Log(string message)
-        {
-            GUIEventArgs args = new GUIEventArgs();
-            args.message = message;
-            if (OnEvent != null)
-            {
-                OnEvent(this, args);
-            }
         }
 
         [STAThread]
@@ -170,7 +192,6 @@ namespace PuzzleSolver
         {
             UI = new GUI();
             Parser = new Parser();
-            Writer = new Writer();
             Solver = new Solver();
             Control.CheckForIllegalCrossThreadCalls = false;
             Application.Run(UI);

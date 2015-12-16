@@ -6,65 +6,60 @@ namespace PuzzleSolver
     public class Parser
     {
         private string filename = null;
-        private string filepath = null;
         private int code;
         private Tile target;
         private List<Tile> pieces;
 
+        //File to be parsed by the parser
         public string Filename
         {
             get { return filename; }
             set { filename = value; }
         }
 
-        public string Filepath
-        {
-            get { return filepath; }
-            set { filepath = value; }
-        }
-
+        //List of Tiles, the result of the Parsing
         public List<Tile> Pieces
         {
             get { return pieces; }
             set { pieces = value; }
         }
 
+        //Tile which represents the solution
         public Tile Target
         {
             get { return target; }
             set { target = value; }
         }
 
+        //Int to keep track of used color codes and set subsequent Tiles' color codes
         public int Code
         {
             get { return code; }
             set { code = value; }
         }
 
-        // constructor
+        //Constructor
         public Parser()
         {
             Filename = "";
-            Filepath = "";
             Code = 0;
             Target = null;
             Pieces = new List<Tile>();
         }
 
+        //Resets properties for new parsing
         public void Reset()
         {
             Filename = "";
-            Filepath = "";
             Code = 0;
             Target = null;
             Pieces.Clear();
         }
 
-        // updates Parser's Filename and Filepath properties
-        public void Update(string name, string path)
+        //Updates Parser's Filename property
+        public void Update(string name)
         {
             Filename = name;
-            Filepath = path;
         }
 
         //Read the file (file is currently hardcoded in), return all the lines as an array of strings
@@ -117,7 +112,6 @@ namespace PuzzleSolver
 
         //Takes the string array of all lines, finds the number of rows and the max row length to create rectangular 2D array
         //Transfers the string array into the 2D array of chars, iterates through each char in the array, if the char is significant, send it to CreateTile()
-        //Result of CreateTile() is used in the constructor of a new Tile()
         public void Parse()
         {
             string[] allLines = ReadFile();
