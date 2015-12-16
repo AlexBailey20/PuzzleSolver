@@ -173,7 +173,7 @@ namespace PuzzleSolver
             Colorcodes = new List<int[,]>();
             Solvethread = new Thread(new ThreadStart(Run));
             Running = false;
-            //Complete = false;
+            Complete = false;
         }
 
         public void UpdateInput(Tile targettile, List<Tile> tilepieces)
@@ -198,7 +198,7 @@ namespace PuzzleSolver
             Colorcodes.Clear();
             Solvethread = new Thread(new ThreadStart(Run));
             Running = false;
-            //Complete = false;
+            Complete = false;
         }
 
         public void Run()
@@ -212,7 +212,6 @@ namespace PuzzleSolver
             }
             //if (i == 0)
                 //Console.WriteLine("Some pieces may not be used if a target is found.");
-            CheckDuplicateTiles();
             Options = new List<Tile>();
             Blanksolution = new char[Target.cSize, Target.rSize];
             Blankcolors = new int[Target.cSize, Target.rSize];
@@ -264,7 +263,7 @@ namespace PuzzleSolver
 
         public void Stop()
         {
-            //Complete = true;
+            Complete = true;
             Solvethread.Abort();
             return;
         }
@@ -319,15 +318,6 @@ namespace PuzzleSolver
                 return -1;
             else
                 return 0;
-        }
-
-        public void CheckDuplicateTiles()
-        {
-            for (int i = 1; i < Pieces.Count; i++)
-                if (Pieces[i].Size == Pieces[i - 1].Size)
-                {
-                    Pieces[i].CheckIsomorphic(Pieces[i - 1]);
-                }
         }
 
         public bool EmptySpaceCheck(bool[,] spaces, int csize, int rsize)

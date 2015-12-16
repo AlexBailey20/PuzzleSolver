@@ -153,15 +153,6 @@ namespace PuzzleSolver
             }
         }
 
-        public void CheckIsomorphic(Tile t)
-        {
-            for(int i = 0; i < t.Orientations.Count; i++)
-            {
-                if (t.Orientations[i].CheckSame(Dimensions))
-                    Colorcode = t.Colorcode;
-            }
-        }
-
         //Comparator method for sorting array to find solution and to optimize algorithm slightly by placing largest tiles first
         public int CompareTo(object obj)
         {

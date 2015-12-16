@@ -40,6 +40,9 @@
             this.SolutionsList = new System.Windows.Forms.ListView();
             this.Target = new System.Windows.Forms.ListView();
             this.Current = new System.Windows.Forms.ListView();
+            this.NextButton = new System.Windows.Forms.Button();
+            this.PreviousButton = new System.Windows.Forms.Button();
+            this.CurrentCheck = new System.Windows.Forms.CheckBox();
             this.MenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -78,6 +81,7 @@
             // SolveButton
             // 
             this.SolveButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.SolveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F);
             this.SolveButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
             this.SolveButton.Location = new System.Drawing.Point(12, 43);
             this.SolveButton.Name = "SolveButton";
@@ -99,7 +103,7 @@
             // 
             this.RotationCheck.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.RotationCheck.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.RotationCheck.Location = new System.Drawing.Point(552, 307);
+            this.RotationCheck.Location = new System.Drawing.Point(564, 355);
             this.RotationCheck.Name = "RotationCheck";
             this.RotationCheck.Size = new System.Drawing.Size(210, 29);
             this.RotationCheck.TabIndex = 8;
@@ -111,7 +115,7 @@
             // 
             this.ReflectionCheck.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ReflectionCheck.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.ReflectionCheck.Location = new System.Drawing.Point(552, 307);
+            this.ReflectionCheck.Location = new System.Drawing.Point(564, 355);
             this.ReflectionCheck.Name = "ReflectionCheck";
             this.ReflectionCheck.Size = new System.Drawing.Size(226, 29);
             this.ReflectionCheck.TabIndex = 9;
@@ -159,6 +163,42 @@
             this.Current.UseCompatibleStateImageBehavior = false;
             this.Current.View = System.Windows.Forms.View.Tile;
             // 
+            // NextButton
+            // 
+            this.NextButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F);
+            this.NextButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.NextButton.Location = new System.Drawing.Point(516, 87);
+            this.NextButton.Name = "NextButton";
+            this.NextButton.Size = new System.Drawing.Size(100, 100);
+            this.NextButton.TabIndex = 14;
+            this.NextButton.Text = "Next";
+            this.NextButton.UseVisualStyleBackColor = true;
+            this.NextButton.Click += new System.EventHandler(this.NextButton_Click);
+            // 
+            // PreviousButton
+            // 
+            this.PreviousButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F);
+            this.PreviousButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.PreviousButton.Location = new System.Drawing.Point(633, 96);
+            this.PreviousButton.Name = "PreviousButton";
+            this.PreviousButton.Size = new System.Drawing.Size(100, 100);
+            this.PreviousButton.TabIndex = 15;
+            this.PreviousButton.Text = "Previous";
+            this.PreviousButton.UseVisualStyleBackColor = true;
+            this.PreviousButton.Click += new System.EventHandler(this.PreviousButton_Click);
+            // 
+            // CurrentCheck
+            // 
+            this.CurrentCheck.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.CurrentCheck.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.CurrentCheck.Location = new System.Drawing.Point(557, 283);
+            this.CurrentCheck.Name = "CurrentCheck";
+            this.CurrentCheck.Size = new System.Drawing.Size(226, 29);
+            this.CurrentCheck.TabIndex = 16;
+            this.CurrentCheck.Text = "Show Current";
+            this.CurrentCheck.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.CurrentCheck.UseVisualStyleBackColor = true;
+            // 
             // GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -166,6 +206,9 @@
             this.AutoScroll = true;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1374, 629);
+            this.Controls.Add(this.CurrentCheck);
+            this.Controls.Add(this.PreviousButton);
+            this.Controls.Add(this.NextButton);
             this.Controls.Add(this.SolutionsList);
             this.Controls.Add(this.ComponentsList);
             this.Controls.Add(this.ReflectionCheck);
@@ -199,5 +242,8 @@
         private System.Windows.Forms.ListView SolutionsList;
         private System.Windows.Forms.ListView Target;
         private System.Windows.Forms.ListView Current;
+        private System.Windows.Forms.Button NextButton;
+        private System.Windows.Forms.Button PreviousButton;
+        private System.Windows.Forms.CheckBox CurrentCheck;
     }
 }

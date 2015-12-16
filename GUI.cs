@@ -17,10 +17,14 @@ namespace PuzzleSolver
         private ApplicationController controller = null;
         private FlowLayoutPanel layoutpanel;
         private FlowLayoutPanel reflrotacontrolpanel;
+        private FlowLayoutPanel navigationcontrolpanel;
         private FlowLayoutPanel controlpanel;
         private FlowLayoutPanel displaypanel;
         private FlowLayoutPanel componentsdisplaypanel;
         private FlowLayoutPanel solutionsdisplaypanel;
+
+        private List<List<ListViewItem>> sols;
+        private int currentsol;
 
         public FlowLayoutPanel Layoutpanel
         {
@@ -32,6 +36,12 @@ namespace PuzzleSolver
         {
             get { return reflrotacontrolpanel; }
             set { reflrotacontrolpanel = value; }
+        }
+
+        public FlowLayoutPanel Navigationcontrolpanel
+        {
+            get { return navigationcontrolpanel; }
+            set { navigationcontrolpanel = value; }
         }
 
         public FlowLayoutPanel Controlpanel
@@ -64,6 +74,18 @@ namespace PuzzleSolver
             set { controller = value; }
         }
 
+        public List<List<ListViewItem>> Sols
+        {
+            get { return sols; }
+            set { sols = value; }
+        }
+
+        public int Currentsol
+        {
+            get { return currentsol; }
+            set { currentsol = value; }
+        }
+
         public GUI()
         {
             InitializeComponent();
@@ -72,10 +94,13 @@ namespace PuzzleSolver
             this.StartPosition = FormStartPosition.CenterScreen;
             Layoutpanel = new FlowLayoutPanel();                // everything
             Reflrotacontrolpanel = new FlowLayoutPanel();       // reflection/rotation options
-            Controlpanel = new FlowLayoutPanel();               // solve button and reflection/rotation options
+            Navigationcontrolpanel = new FlowLayoutPanel();     // solution navigation
+            Controlpanel = new FlowLayoutPanel();               // solve button, reflection/rotation options, and solution navigation
             Displaypanel = new FlowLayoutPanel();               // all displays
             Componentsdisplaypanel = new FlowLayoutPanel();     // top row of displays
             Solutionsdisplaypanel = new FlowLayoutPanel();     // bottom row of displays
+            Sols = new List<List<ListViewItem>>();
+            Currentsol = -1;
             Arrange();
         }
 
@@ -88,14 +113,18 @@ namespace PuzzleSolver
             Reflrotacontrolpanel.FlowDirection = FlowDirection.TopDown;
             Reflrotacontrolpanel.Controls.Add(ReflectionCheck);
             Reflrotacontrolpanel.Controls.Add(RotationCheck);
+            Reflrotacontrolpanel.Controls.Add(CurrentCheck);
             ReflectionCheck.Anchor = AnchorStyles.Left;
             RotationCheck.Anchor = AnchorStyles.Left;
+            CurrentCheck.Anchor = AnchorStyles.Left;
 
             Controlpanel.FlowDirection = FlowDirection.LeftToRight;
-            Controlpanel.Anchor = AnchorStyles.Left;
+            Controlpanel.Dock = DockStyle.Fill;
             Controlpanel.Width = Layoutpanel.Width;
-            Controlpanel.Height = (SolveButton.Height + 5);
+            Controlpanel.Height = (SolveButton.Height + 15);
             Controlpanel.Controls.Add(SolveButton);
+            Controlpanel.Controls.Add(PreviousButton);
+            Controlpanel.Controls.Add(NextButton);
             Controlpanel.Controls.Add(Reflrotacontrolpanel);
 
             NotificationBox.Anchor = AnchorStyles.Left;
@@ -159,10 +188,76 @@ namespace PuzzleSolver
             return ReflectionCheck.Checked;
         }
 
-        public void setOptionsEnabled()
+        public bool GetCurrentOption()
+        {
+            CurrentCheck.Enabled = false;
+            return CurrentCheck.Checked;
+        }
+
+        public void SetOptionsEnabled()
         {
             RotationCheck.Enabled = true;
             ReflectionCheck.Enabled = true;
+            CurrentCheck.Enabled = true;
+        }
+
+        public void SetNavigation(bool nav)
+        {
+            NextButton.Enabled = nav;
+            PreviousButton.Enabled = nav;
+        }
+
+        public void NextSolution()
+        {
+            if (Currentsol == -1)
+                return;
+            else if (Currentsol != (Sols.Count - 1))
+            {
+                Console.Out.WriteLine("y");
+                SolutionsList.Hide();
+                SolutionsList.Clear();
+                SolutionsList.View = View.Details;
+                SolutionsList.HeaderStyle = ColumnHeaderStyle.None;
+                int cols = Sols.ElementAt(Currentsol + 1).ElementAt(0).SubItems.Count;
+                while (SolutionsList.Columns.Count < cols)
+                    SolutionsList.Columns.Add("");
+                foreach (ListViewItem r in Sols.ElementAt(Currentsol + 1))
+                    SolutionsList.Items.Add(r);
+                Currentsol++;
+                SolutionsList.Refresh();
+                SolutionsList.Show();
+                UpdateNotificationBox("Showing solution " + (Currentsol + 1) + ".");
+            }
+            else
+            {
+                UpdateNotificationBox("Invalid.");
+            }
+        }
+
+        public void PreviousSolution()
+        {
+            if (Currentsol == -1)
+                return;
+            else if (Currentsol != 0)
+            {
+                SolutionsList.Hide();
+                SolutionsList.Clear();
+                SolutionsList.View = View.Details;
+                SolutionsList.HeaderStyle = ColumnHeaderStyle.None;
+                int cols = Sols.ElementAt(Currentsol - 1).ElementAt(0).SubItems.Count;
+                while (SolutionsList.Columns.Count < cols)
+                    SolutionsList.Columns.Add("");
+                foreach (ListViewItem r in Sols.ElementAt(Currentsol - 1))
+                    SolutionsList.Items.Add(r);
+                Currentsol--;
+                SolutionsList.Refresh();
+                SolutionsList.Show();
+                UpdateNotificationBox("Showing solution " + (Currentsol + 1) + ".");
+            }
+            else
+            {
+                UpdateNotificationBox("Invalid.");
+            }
         }
 
         public void UpdateNotificationBox(string message)
@@ -247,8 +342,8 @@ namespace PuzzleSolver
                         ComponentsList.Items.Add(new ListViewItem(empty));
                     }
                 }
-                ComponentsList.Refresh();
-                Target.Refresh();
+                ComponentsList.Show();
+                Target.Show();
             }
         }
 
@@ -256,10 +351,11 @@ namespace PuzzleSolver
         {
             SolutionsList.View = View.Details;
             SolutionsList.HeaderStyle = ColumnHeaderStyle.None;
-            //SolutionsList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
-            List<ListViewItem> allrows = new List<ListViewItem>();
+            SolutionsList.Hide();
+            Sols = new List<List<ListViewItem>>();
             foreach(int[,] solution in solutions)
             {
+                List<ListViewItem> solrows = new List<ListViewItem>();
                 int rows = solution.GetLength(1);
                 int cols = solution.GetLength(0);
                 while (SolutionsList.Columns.Count < cols)
@@ -288,57 +384,59 @@ namespace PuzzleSolver
                         }
 
                     }
-                    allrows.Add(row);
+                    solrows.Add(row);
                 }
-                allrows.Add(new ListViewItem());
+                Sols.Add(solrows);
             }
-            foreach (ListViewItem row in allrows)
-            {
-                if (!SolutionsList.Items.Contains(row))
-                    SolutionsList.Items.Add(row);
-            }
-            SolutionsList.Refresh();
+            foreach (ListViewItem r in Sols.ElementAt(0))
+                SolutionsList.Items.Add(r);
+            Currentsol = 0;
+            SolutionsList.Show();
         }
 
         public void UpdateCurrent(int[,] current)
         {
-            Current.Clear();
-            Current.View = View.Details;
-            Current.HeaderStyle = ColumnHeaderStyle.None;
-            List<ListViewItem> allrows = new List<ListViewItem>();
-            int rows = current.GetLength(1);
-            int cols = current.GetLength(0);
-            while (Current.Columns.Count < cols)
-                Current.Columns.Add("");
-            string[] rowchars = new string[cols];
-            string[] empty = { };
-            for (int j = 0; j < rows; ++j)
+            if (CurrentCheck.Checked)
             {
-                var row = new ListViewItem();
-                for (int k = 0; k < cols; k++)
+                Current.Clear();
+                Current.View = View.Details;
+                Current.HeaderStyle = ColumnHeaderStyle.None;
+                Current.Hide();
+                List<ListViewItem> allrows = new List<ListViewItem>();
+                int rows = current.GetLength(1);
+                int cols = current.GetLength(0);
+                while (Current.Columns.Count < cols)
+                    Current.Columns.Add("");
+                string[] rowchars = new string[cols];
+                string[] empty = { };
+                for (int j = 0; j < rows; ++j)
                 {
-                    rowchars[k] = current[k, j].ToString();
-                }
-                for (int r = 0; r < cols; r++)
-                {
-                    row.SubItems.Add("");
-                    if (rowchars[r] != " ")
+                    var row = new ListViewItem();
+                    for (int k = 0; k < cols; k++)
                     {
-                        SetSubItemColor(null, current, row, r, j);
-                        row.UseItemStyleForSubItems = false;
+                        rowchars[k] = current[k, j].ToString();
                     }
-                    else
+                    for (int r = 0; r < cols; r++)
                     {
-                        row.SubItems[r].BackColor = Color.White;
-                        row.UseItemStyleForSubItems = false;
-                    }
+                        row.SubItems.Add("");
+                        if (rowchars[r] != " ")
+                        {
+                            SetSubItemColor(null, current, row, r, j);
+                            row.UseItemStyleForSubItems = false;
+                        }
+                        else
+                        {
+                            row.SubItems[r].BackColor = Color.White;
+                            row.UseItemStyleForSubItems = false;
+                        }
 
+                    }
+                    allrows.Add(row);
                 }
-                allrows.Add(row);
+                foreach (ListViewItem row in allrows)
+                    Current.Items.Add(row);
+                Current.Show();
             }
-            foreach (ListViewItem row in allrows)
-                Current.Items.Add(row);
-            Current.Refresh();
         }
 
         public void ClearCurrent()
@@ -396,6 +494,8 @@ namespace PuzzleSolver
                         row.SubItems[j].BackColor = Color.PaleVioletRed;
                     if (component.Colorcode == 20)
                         row.SubItems[j].BackColor = Color.DimGray;
+                    if (component.Colorcode > 20)
+                        row.SubItems[j].Text = component.Colorcode.ToString();
                 }
             }
             else if (component == null)
@@ -473,6 +573,8 @@ namespace PuzzleSolver
                 Target.Clear();
                 SolutionsList.Clear();
                 Current.Clear();
+                Sols.Clear();
+                Currentsol = -1;
                 Controller.Update(filename, filepath);
             }
         }
@@ -480,7 +582,19 @@ namespace PuzzleSolver
         private void PlayButton_Click(object sender, EventArgs e)
         {
             SolutionsList.Clear();
+            Sols.Clear();
+            Currentsol = -1;
             Controller.Run();
+        }
+
+        private void NextButton_Click(object sender, EventArgs e)
+        {
+            NextSolution();
+        }
+
+        private void PreviousButton_Click(object sender, EventArgs e)
+        {
+            PreviousSolution();
         }
 
         private void OnEvent(object sender, GUIEventArgs e)
