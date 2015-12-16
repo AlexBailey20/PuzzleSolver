@@ -82,7 +82,7 @@ namespace PuzzleSolver
             Parser.Parse();
             Solver.UpdateInput(Parser.Target, Parser.Pieces);
             UI.PopulateComponents(Parser.Pieces);
-            UI.setOptionsEnabled();
+            UI.SetOptionsEnabled();
             UI.UpdateNotificationBox("Input loaded from: " + name + ". Component tiles are multi-colored and target tile is black.");
         }
 
@@ -90,6 +90,7 @@ namespace PuzzleSolver
         {
             if (!Solver.Running)
             {
+                UI.SetNavigation(false);
                 Solver.Stop();
                 Solver.Reset();
                 if (Timer != null)
@@ -133,20 +134,20 @@ namespace PuzzleSolver
                 Timer.Close();
                 Solver.Running = false;
             }
-            else if (result == 2)
+            else if (result == 2 && Solver.Complete)
             {
-                UI.UpdateNotificationBox(Solver.Colorcodes.Count + " solutions found. Populating display...");
-                UI.PopulateSolutions(Solver.Colorcodes);
-                UI.ClearCurrent();
                 int num = Solver.Colorcodes.Count;
                 if (num == 1)
                     UI.UpdateNotificationBox(num + " solution found.");
                 else
                     UI.UpdateNotificationBox(num + " solutions found.");
+                UI.PopulateSolutions(Solver.Colorcodes);
+                UI.ClearCurrent();
+                UI.SetNavigation(true);
                 Timer.Close();
                 Solver.Running = false;
             }
-            UI.setOptionsEnabled();
+            UI.SetOptionsEnabled();
         }
 
         private void OnCheck(Object source, System.Timers.ElapsedEventArgs e)
