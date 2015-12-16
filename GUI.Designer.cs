@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.MenuStrip = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -38,19 +38,21 @@
             this.ReflectionCheck = new System.Windows.Forms.CheckBox();
             this.ComponentsList = new System.Windows.Forms.ListView();
             this.SolutionsList = new System.Windows.Forms.ListView();
-            this.menuStrip1.SuspendLayout();
+            this.Target = new System.Windows.Forms.ListView();
+            this.Current = new System.Windows.Forms.ListView();
+            this.MenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
-            // menuStrip1
+            // MenuStrip
             // 
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuStrip.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.MenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1394, 40);
-            this.menuStrip1.TabIndex = 0;
-            this.menuStrip1.Text = "menuStrip1";
+            this.MenuStrip.Location = new System.Drawing.Point(0, 0);
+            this.MenuStrip.Name = "MenuStrip";
+            this.MenuStrip.Size = new System.Drawing.Size(1374, 40);
+            this.MenuStrip.TabIndex = 0;
+            this.MenuStrip.Text = "MenuStrip";
             // 
             // toolStripMenuItem1
             // 
@@ -75,6 +77,7 @@
             // 
             // SolveButton
             // 
+            this.SolveButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.SolveButton.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
             this.SolveButton.Location = new System.Drawing.Point(12, 43);
             this.SolveButton.Name = "SolveButton";
@@ -94,39 +97,67 @@
             // 
             // RotationCheck
             // 
-            this.RotationCheck.AutoSize = true;
-            this.RotationCheck.Location = new System.Drawing.Point(138, 80);
+            this.RotationCheck.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.RotationCheck.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.RotationCheck.Location = new System.Drawing.Point(552, 307);
             this.RotationCheck.Name = "RotationCheck";
             this.RotationCheck.Size = new System.Drawing.Size(210, 29);
             this.RotationCheck.TabIndex = 8;
             this.RotationCheck.Text = "Include Rotations";
+            this.RotationCheck.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             this.RotationCheck.UseVisualStyleBackColor = true;
             // 
             // ReflectionCheck
             // 
-            this.ReflectionCheck.AutoSize = true;
-            this.ReflectionCheck.Location = new System.Drawing.Point(366, 80);
+            this.ReflectionCheck.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ReflectionCheck.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.ReflectionCheck.Location = new System.Drawing.Point(552, 307);
             this.ReflectionCheck.Name = "ReflectionCheck";
             this.ReflectionCheck.Size = new System.Drawing.Size(226, 29);
             this.ReflectionCheck.TabIndex = 9;
             this.ReflectionCheck.Text = "Include Reflections";
+            this.ReflectionCheck.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             this.ReflectionCheck.UseVisualStyleBackColor = true;
             // 
             // ComponentsList
             // 
+            this.ComponentsList.GridLines = true;
             this.ComponentsList.Location = new System.Drawing.Point(12, 149);
             this.ComponentsList.Name = "ComponentsList";
-            this.ComponentsList.Size = new System.Drawing.Size(1370, 225);
-            this.ComponentsList.TabIndex = 10;
+            this.ComponentsList.Size = new System.Drawing.Size(0, 0);
+            this.ComponentsList.TabIndex = 13;
             this.ComponentsList.UseCompatibleStateImageBehavior = false;
+            this.ComponentsList.View = System.Windows.Forms.View.Tile;
             // 
             // SolutionsList
             // 
+            this.SolutionsList.GridLines = true;
             this.SolutionsList.Location = new System.Drawing.Point(12, 380);
             this.SolutionsList.Name = "SolutionsList";
-            this.SolutionsList.Size = new System.Drawing.Size(1370, 225);
+            this.SolutionsList.Size = new System.Drawing.Size(0, 0);
             this.SolutionsList.TabIndex = 11;
             this.SolutionsList.UseCompatibleStateImageBehavior = false;
+            this.SolutionsList.View = System.Windows.Forms.View.Tile;
+            // 
+            // Target
+            // 
+            this.Target.GridLines = true;
+            this.Target.Location = new System.Drawing.Point(0, 0);
+            this.Target.Name = "Target";
+            this.Target.Size = new System.Drawing.Size(121, 97);
+            this.Target.TabIndex = 0;
+            this.Target.UseCompatibleStateImageBehavior = false;
+            this.Target.View = System.Windows.Forms.View.Tile;
+            // 
+            // Current
+            // 
+            this.Current.GridLines = true;
+            this.Current.Location = new System.Drawing.Point(0, 0);
+            this.Current.Name = "Current";
+            this.Current.Size = new System.Drawing.Size(121, 97);
+            this.Current.TabIndex = 0;
+            this.Current.UseCompatibleStateImageBehavior = false;
+            this.Current.View = System.Windows.Forms.View.Tile;
             // 
             // GUI
             // 
@@ -134,23 +165,21 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1394, 672);
+            this.ClientSize = new System.Drawing.Size(1374, 629);
             this.Controls.Add(this.SolutionsList);
             this.Controls.Add(this.ComponentsList);
             this.Controls.Add(this.ReflectionCheck);
             this.Controls.Add(this.RotationCheck);
             this.Controls.Add(this.NotificationBox);
             this.Controls.Add(this.SolveButton);
-            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.MenuStrip);
             this.DoubleBuffered = true;
-            this.MainMenuStrip = this.menuStrip1;
-            this.MinimizeBox = false;
+            this.MainMenuStrip = this.MenuStrip;
             this.Name = "GUI";
-            this.RightToLeftLayout = true;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "PuzzleSolver";
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.MenuStrip.ResumeLayout(false);
+            this.MenuStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -158,7 +187,7 @@
 
         #endregion
 
-        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.MenuStrip MenuStrip;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.Button SolveButton;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
@@ -168,5 +197,7 @@
         private System.Windows.Forms.CheckBox ReflectionCheck;
         private System.Windows.Forms.ListView ComponentsList;
         private System.Windows.Forms.ListView SolutionsList;
+        private System.Windows.Forms.ListView Target;
+        private System.Windows.Forms.ListView Current;
     }
 }

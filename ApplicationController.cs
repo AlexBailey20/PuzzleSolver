@@ -82,14 +82,13 @@ namespace PuzzleSolver
             Parser.Parse();
             Solver.UpdateInput(Parser.Target, Parser.Pieces);
             UI.PopulateComponents(Parser.Pieces);
-            UI.UpdateNotificationBox("Input loaded from: " + name);
+            UI.setOptionsEnabled();
+            UI.UpdateNotificationBox("Input loaded from: " + name + ". Component tiles are multi-colored and target tile is black.");
         }
 
         public void Run()
         {
-            if (Solver.Running)
-                return;
-            if (Solver.Complete)
+            if (!Solver.Running)
             {
                 Solver.Stop();
                 Solver.Reset();
@@ -101,38 +100,51 @@ namespace PuzzleSolver
                 Solver.UpdateInput(Parser.Target, Parser.Pieces);
                 Solver.RotationOption = UI.GetRotationOption();
                 Solver.ReflectionOption = UI.GetReflectionOption();
+                UI.UpdateNotificationBox("Searching for solutions...");
+                Solver.Running = true;
+                Solver.Run();
+                Timer = new System.Timers.Timer(500);
+                Timer.Elapsed += OnCheck;
+                Timer.AutoReset = true;
+                Timer.Enabled = true;
+                Timer.Start();
             }
-            UI.UpdateNotificationBox("Searching for solutions...");
-            Solver.Run();
-            Timer = new System.Timers.Timer(2000);
-            Timer.Elapsed += OnCheck;
-            Timer.AutoReset = true;
-            Timer.Enabled = true;
         }
 
         public void GetResults()
         {
             int result = Solver.SolutionState;
             if (result == -1)
+            {
+                UI.UpdateCurrent(Solver.Current);
                 return;
-            Timer.Enabled = false;
+            }
             if (result == 0)
             {
                 UI.UpdateNotificationBox("No solution possible.");
+                UI.ClearCurrent();
+                Timer.Close();
+                Solver.Running = false;
             }
             else if (result == 1)
             {
                 UI.UpdateNotificationBox("No solutions found.");
+                UI.ClearCurrent();
+                Timer.Close();
+                Solver.Running = false;
             }
             else if (result == 2)
             {
                 UI.UpdateNotificationBox(Solver.Colorcodes.Count + " solutions found. Populating display...");
                 UI.PopulateSolutions(Solver.Colorcodes);
+                UI.ClearCurrent();
                 int num = Solver.Colorcodes.Count;
                 if (num == 1)
                     UI.UpdateNotificationBox(num + " solution found.");
                 else
                     UI.UpdateNotificationBox(num + " solutions found.");
+                Timer.Close();
+                Solver.Running = false;
             }
             UI.setOptionsEnabled();
         }
