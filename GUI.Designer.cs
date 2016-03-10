@@ -31,7 +31,6 @@
             this.MenuStrip = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SolveButton = new System.Windows.Forms.Button();
             this.NotificationBox = new System.Windows.Forms.RichTextBox();
             this.RotationCheck = new System.Windows.Forms.CheckBox();
@@ -60,8 +59,7 @@
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openToolStripMenuItem,
-            this.createToolStripMenuItem});
+            this.openToolStripMenuItem });
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(64, 36);
             this.toolStripMenuItem1.Text = "File";
@@ -72,11 +70,6 @@
             this.openToolStripMenuItem.Size = new System.Drawing.Size(174, 38);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
-            // 
-            // createToolStripMenuItem
-            // 
-            this.createToolStripMenuItem.Name = "createToolStripMenuItem";
-            this.createToolStripMenuItem.Size = new System.Drawing.Size(174, 38);
             // 
             // SolveButton
             // 
@@ -234,7 +227,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.Button SolveButton;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem createToolStripMenuItem;
         private System.Windows.Forms.RichTextBox NotificationBox;
         private System.Windows.Forms.CheckBox RotationCheck;
         private System.Windows.Forms.CheckBox ReflectionCheck;

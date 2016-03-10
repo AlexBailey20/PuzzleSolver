@@ -62,7 +62,7 @@ namespace PuzzleSolver
             Filename = name;
         }
 
-        //Read the file (file is currently hardcoded in), return all the lines as an array of strings
+        //Read the file, return all the lines as an array of strings
         public string[] ReadFile()
         {
             StreamReader reader = File.OpenText(Filename);

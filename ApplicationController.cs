@@ -3,75 +3,91 @@ using System.IO;
 using System.Timers;
 using System.Windows.Forms;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace PuzzleSolver
 {
 
+    /// <summary>
+    /// The controller for the PuzzleSolver application.
+    /// </summary>
     public class ApplicationController
     {
-        private static GUI ui = null;
-        private static Parser parser = null;
-        private static Solver solver = null;
-        private static System.Timers.Timer timer = null;
-        private string filename;
+        private static GUI _ui = null;
+        private static Parser _parser = null;
+        private static Solver _solver = null;
+        private static System.Timers.Timer _timer = null;
+        private string _filename;
 
-        //Windows Form containing our user interface code
+        /// <summary>
+        /// The application's GUI.
+        /// </summary>
         public static GUI UI
         {
-            get { return ui; }
-            set { ui = value; }
+            get { return _ui; }
+            set { _ui = value; }
         }
 
-        //Parses input files
+        /// <summary>
+        /// Parses an input file (.txt) and generates a list of tiles.
+        /// </summary>
+        /// <remarks>
+        /// Reads the input file, transforms it into a 2-dimensional character
+        /// array, and searches this array for puzzle pieces to create a
+        /// list of <c>Tile</c> objects. Also creates a <c>Tile</c> object representing
+        /// the target solution.
+        /// </remarks>
         public static Parser Parser
         {
-            get { return parser; }
-            set { parser = value; }
+            get { return _parser; }
+            set { _parser = value; }
         }
 
-        //Solution search mechanism/algorithms
+        /// <summary>
+        /// Searches the problem space for solutions.
+        /// </summary>
         public static Solver Solver
         {
-            get { return solver; }
-            set { solver = value; }
+            get { return _solver; }
+            set { _solver = value; }
         }
 
-        //Timer to keep checking for solutions from Solver
         public static System.Timers.Timer Timer
         {
-            get { return timer; }
-            set { timer = value; }
+            get { return _timer; }
+            set { _timer = value; }
         }
 
-        //input puzzle filename
         public String Filename
         {
-            get { return filename; }
-            set { filename = value; }
+            get { return _filename; }
+            set { _filename = value; }
         }
 
-        //Updates all necessary propertis and prepares for solving when passed an input file
-        public void Update(string name)
+        /// <summary>
+        /// When passed an input file, updates necessary properties and prepares application for the solution search process.
+        /// </summary>
+        /// <param name="filename">The current input file.</param>
+        public void Update(string filename)
         {
             Solver.Stop();
             Solver.Reset();
             if (Timer != null)
                 Timer.Close();
             Parser.Reset();
-            Filename = name;
-            Parser.Update(name);
+            Filename = filename;
+            Parser.Update(filename);
             Parser.Parse();
             Solver.UpdateInput(Parser.Target, Parser.Pieces);
             UI.PopulateComponents(Parser.Pieces);
             UI.SetOptionsEnabled();
-            UI.UpdateNotificationBox("Input loaded from: " + name + ". Component tiles are multi-colored and target tile is black.");
+            UI.UpdateNotificationBox("Input loaded from: " + filename + ". Component tiles are multi-colored and target tile is black.");
         }
 
-        //conducts the search process
+        /// <summary>
+        /// Prepares application for the solution search process and runs the <c>Solver</c> to begin solution search.
+        /// TODO: clean up unnecessary overlap with <c>Update</c>.
+        /// </summary>
         public void Run()
         {
             if (!Solver.Running)
@@ -82,7 +98,7 @@ namespace PuzzleSolver
                 if (Timer != null)
                     Timer.Close();
                 Parser.Reset();
-                Parser.Update(filename);
+                Parser.Update(Filename);
                 Parser.Parse();
                 Solver.UpdateInput(Parser.Target, Parser.Pieces);
                 Solver.RotationOption = UI.GetRotationOption();
@@ -98,9 +114,12 @@ namespace PuzzleSolver
             }
         }
 
-        //pulls results from Solver based on SolutionState, called every 500ms or so while search is running
-        //reports findings, takes necessary closing actions once search is complete
-        //writes solution file
+        /// <summary>
+        /// Polls the <c>Solver</c> for results every 500ms.
+        /// </summary>
+        /// <remarks>
+        /// If the search is complete, updates the UI and creates a solution file (.txt) if solutions have been found.
+        /// </remarks>
         public void GetResults()
         {
             int result = Solver.SolutionState;
@@ -146,47 +165,49 @@ namespace PuzzleSolver
             UI.SetOptionsEnabled();
         }
 
+        /// <summary>
+        /// Composes a file (.txt) containing all solutions to the current puzzle.
+        /// </summary>
+        /// <param name="colorcodes">The list of solutions, represented as 2-dimensional integer arrays.</param>
+        /// <returns>A string array of all solutions, stacked vertically.</returns>
         public string[] Compose(List<int[,]> colorcodes)
         {
             int count = 0;
             string line = "";
             List<string> alllines = new List<string>();
             List<string> templines = new List<string>();
-            // iterate through all solutions
             foreach (int[,] colorcode in colorcodes)
             {
-                // iterate through each row
                 for (int n = 0; n < colorcode.GetLength(1); n++)
                 {
-                    // iterate through all characters
                     for (int m = 0; m < colorcode.GetLength(0); m++)
-                    {
                         line += colorcode[m, n];
-                    }
-                    // form subarray for each solution
                     templines.Add(line);
                     line = "";
                 }
-                // add each subarray to array holding all solutions
                 foreach (string templine in templines)
                     alllines.Add(templine);
                 alllines.Add("");
-                // clear templines for next pass
                 templines.Clear();
-                // advance counter
                 count++;
             }
-            // change to array and pass to WriteFile
             string[] alllinesarray = alllines.ToArray();
             return alllinesarray;
         }
 
-        //called eveery 500ms to check for solutions
+        /// <summary>
+        /// Called by delegate ElapsedEventHandler every 500ms; calls <c>GetResults</c> to check the status of <c>Solver</c>.
+        /// </summary>
+        /// <param name="source">The <c>Timer</c> object.</param>
+        /// <param name="e">No <c>ElapsedEventArgs</c> will be passed.</param>
         private void OnCheck(Object source, System.Timers.ElapsedEventArgs e)
         {
             GetResults();
         }
 
+        /// <summary>
+        /// Runs the application.
+        /// </summary>
         [STAThread]
         static void Main()
         {
